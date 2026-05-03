@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>INLS 523 Practice Quiz 3</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=JetBrains+Mono:wght@400;600&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f5f0;
+    --surface: #ffffff;
+    --surface2: #f2f0eb;
+    --border: #ddd9d0;
+    --accent: #c0392b;
+    --accent2: #2471a3;
+    --green: #1e8449;
+    --red: #c0392b;
+    --orange: #d35400;
+    --text: #1a1a1a;
+    --muted: #7a7570;
+    --code-bg: #1e2430;
+    --code-text: #b8cce8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 28px 20px 60px;
+  }
+  .container { max-width: 860px; margin: auto; }
+
+  header { margin-bottom: 26px; border-bottom: 2px solid var(--text); padding-bottom: 14px; }
+  header h1 { font-family: 'DM Serif Display', serif; font-size: 1.8rem; color: var(--text); margin-bottom: 2px; }
+  header p { font-size: 0.82rem; color: var(--muted); font-weight: 300; }
+  header .accent-line { display: inline-block; background: var(--accent); color: white; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 2px; margin-right: 8px; letter-spacing: 0.06em; text-transform: uppercase; }
+
+  .schema-box { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px 18px; margin-bottom: 22px; }
+  .schema-box h3 { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 12px; font-weight: 700; }
+  .schema-tables { display: flex; flex-wrap: wrap; gap: 10px; }
+  .table-card { border: 1.5px solid var(--text); border-radius: 4px; overflow: hidden; min-width: 120px; flex: 1; }
+  .table-header { background: var(--text); color: white; padding: 4px 10px; font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 0.73rem; }
+  .table-row { padding: 3px 10px; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--muted); border-top: 1px solid var(--border); }
+  .table-row .pk { text-decoration: underline; color: var(--accent); font-weight: 600; }
+  .table-row .fk { color: var(--accent2); }
+
+  .progress-wrap { margin-bottom: 18px; }
+  .progress-bar { width: 100%; height: 3px; background: var(--border); margin-bottom: 7px; }
+  .progress-fill { height: 100%; background: var(--accent); transition: width 0.4s ease; }
+  .progress-meta { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--muted); }
+
+  .q-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 14px; }
+  .q-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .type-tag { background: var(--surface2); border: 1px solid var(--border); padding: 1px 7px; border-radius: 2px; font-weight: 700; }
+  .q-text { font-size: 0.92rem; line-height: 1.65; margin-bottom: 12px; font-weight: 400; }
+  .code-block { background: var(--code-bg); border-radius: 6px; padding: 12px 14px; font-family: 'JetBrains Mono', monospace; font-size: 0.73rem; color: var(--code-text); white-space: pre; overflow-x: auto; margin-bottom: 14px; line-height: 1.7; }
+  .kw { color: #7eb8f7; } .str { color: #98d98e; } .cmt { color: #6a7a8a; }
+
+  .options { display: flex; flex-direction: column; gap: 6px; }
+  .opt-btn { text-align: left; padding: 9px 13px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface2); color: var(--text); cursor: pointer; font-size: 0.84rem; font-family: 'DM Sans', sans-serif; font-weight: 300; line-height: 1.5; transition: border-color 0.12s, background 0.12s; }
+  .opt-btn:hover:not([disabled]) { border-color: var(--accent2); background: #eaf2fb; }
+  .opt-btn.correct { background: #eafaf1; border-color: var(--green); color: #145a32; }
+  .opt-btn.wrong { background: #fdedec; border-color: var(--red); color: #7b241c; }
+  .opt-letter { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--muted); margin-right: 6px; }
+  .opt-btn.correct .opt-letter { color: var(--green); }
+  .opt-btn.wrong .opt-letter { color: var(--red); }
+
+  .explanation { margin-top: 12px; padding: 10px 14px; background: #fef9ec; border-left: 3px solid var(--orange); border-radius: 0 5px 5px 0; font-size: 0.81rem; color: #5d4037; line-height: 1.65; font-weight: 300; display: none; }
+  .explanation .tag { display: inline-block; background: #fff3e0; border: 1px solid var(--orange); color: var(--orange); font-size: 0.66rem; padding: 1px 6px; border-radius: 2px; margin-right: 6px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.06em; vertical-align: middle; }
+
+  .nav { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+  .nav-btn { padding: 8px 20px; border: 1.5px solid var(--text); background: transparent; color: var(--text); border-radius: 5px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.84rem; font-weight: 700; letter-spacing: 0.02em; transition: background 0.12s, color 0.12s; }
+  .nav-btn:hover:not([disabled]) { background: var(--text); color: white; }
+  .nav-btn:disabled { border-color: var(--border); color: var(--border); cursor: default; }
+  .nav-btn.primary { border-color: var(--accent); color: var(--accent); }
+  .nav-btn.primary:hover:not([disabled]) { background: var(--accent); color: white; }
+  .score-pill { font-size: 0.78rem; color: var(--muted); background: var(--surface2); border: 1px solid var(--border); padding: 4px 14px; border-radius: 20px; }
+  .score-pill span { color: var(--text); font-weight: 700; }
+
+  /* Results */
+  .results { display: none; }
+  .results-hero { background: var(--surface); border: 1.5px solid var(--text); border-radius: 8px; padding: 32px 24px; text-align: center; margin-bottom: 20px; }
+  .results-hero h2 { font-family: 'DM Serif Display', serif; font-size: 1.8rem; margin-bottom: 6px; }
+  .score-display { font-family: 'JetBrains Mono', monospace; font-size: 4rem; font-weight: 600; color: var(--text); line-height: 1; margin: 18px 0 6px; }
+  .score-pct { font-size: 0.9rem; color: var(--muted); margin-bottom: 12px; }
+  .res-msg { font-size: 0.88rem; color: var(--muted); max-width: 440px; margin: 0 auto; line-height: 1.6; }
+
+  .summary-section { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px 22px; margin-bottom: 14px; }
+  .summary-section h3 { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 16px; font-weight: 700; }
+
+  .topic-row { display: flex; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); gap: 10px; }
+  .topic-row:last-child { border-bottom: none; }
+  .topic-name { font-size: 0.83rem; flex: 1.2; min-width: 0; }
+  .topic-bar-wrap { flex: 1; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .topic-bar { height: 100%; border-radius: 3px; transition: width 0.7s ease; }
+  .topic-score-label { font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--muted); min-width: 38px; text-align: right; }
+  .badge { font-size: 0.66rem; padding: 2px 8px; border-radius: 2px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; min-width: 72px; text-align: center; }
+  .badge.strong { background: #eafaf1; color: var(--green); border: 1px solid var(--green); }
+  .badge.review { background: #fef5e7; color: var(--orange); border: 1px solid var(--orange); }
+  .badge.focus { background: #fdedec; color: var(--red); border: 1px solid var(--red); }
+
+  .missed-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; margin-bottom: 8px; font-size: 0.81rem; line-height: 1.6; }
+  .missed-q-ref { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--accent2); margin-bottom: 4px; }
+  .missed-wrong { color: var(--red); margin-bottom: 2px; }
+  .missed-right { color: var(--green); margin-bottom: 4px; }
+  .missed-expl { color: var(--muted); font-weight: 300; font-size: 0.79rem; }
+
+  .restart-btn { display: block; margin: 20px auto 0; padding: 10px 32px; background: transparent; border: 1.5px solid var(--accent); color: var(--accent); border-radius: 5px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 700; letter-spacing: 0.04em; transition: background 0.12s, color 0.12s; }
+  .restart-btn:hover { background: var(--accent); color: white; }
+
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+  <div style="display:flex; gap:15px; justify-content:center; margin-bottom:20px;">
+    <a href="index.html">Quiz 1</a>
+    <a href="inls523_practice_quiz2(1).html">Quiz 2</a>
+    <a href="inls523_practice_quiz3(1).html">Quiz 3</a>
+  </div>
+<div class="container">
+  <header>
+    <h1>INLS 523 &mdash; Practice Quiz 3</h1>
+    <p>
+      <span class="accent-line">34 questions</span>
+      University course registration database &bull; SQL queries, schema reasoning, fill-in-the-blank, aggregation
+    </p>
+  </header>
+
+  <div class="schema-box">
+    <h3>Relational Schema</h3>
+    <div class="schema-tables">
+      <div class="table-card">
+        <div class="table-header">students</div>
+        <div class="table-row"><span class="pk">sid</span></div>
+        <div class="table-row">name</div>
+        <div class="table-row">gpa</div>
+        <div class="table-row">dept</div>
+        <div class="table-row">year</div>
+      </div>
+      <div class="table-card">
+        <div class="table-header">courses</div>
+        <div class="table-row"><span class="pk">cid</span></div>
+        <div class="table-row">title</div>
+        <div class="table-row">dept</div>
+        <div class="table-row">credits</div>
+        <div class="table-row">capacity</div>
+      </div>
+      <div class="table-card">
+        <div class="table-header">enrolls</div>
+        <div class="table-row"><span class="pk fk">sid</span> &rarr; students</div>
+        <div class="table-row"><span class="pk fk">cid</span> &rarr; courses</div>
+        <div class="table-row">semester</div>
+        <div class="table-row">grade</div>
+      </div>
+      <div class="table-card">
+        <div class="table-header">teaches</div>
+        <div class="table-row"><span class="pk fk">prof_id</span> &rarr; professors</div>
+        <div class="table-row"><span class="pk fk">cid</span> &rarr; courses</div>
+        <div class="table-row">semester</div>
+      </div>
+      <div class="table-card">
+        <div class="table-header">professors</div>
+        <div class="table-row"><span class="pk">prof_id</span></div>
+        <div class="table-row">name</div>
+        <div class="table-row">dept</div>
+        <div class="table-row">rank</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="quiz-wrap">
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+      <div class="progress-meta">
+        <span id="prog-label">Question 1 of 34</span>
+        <span id="score-label">0 answered</span>
+      </div>
+    </div>
+    <div id="q-area"></div>
+    <div class="nav">
+      <button class="nav-btn" id="btn-prev" onclick="navigate(-1)" disabled>&larr; Prev</button>
+      <div class="score-pill">Score: <span id="score-num">0</span> / <span id="score-den">0</span></div>
+      <button class="nav-btn primary" id="btn-next" disabled>Next &rarr;</button>
+    </div>
+  </div>
+
+  <div class="results" id="results-wrap">
+    <div class="results-hero">
+      <h2>Quiz Complete</h2>
+      <div class="score-display" id="res-score"></div>
+      <div class="score-pct" id="res-pct"></div>
+      <div class="res-msg" id="res-msg"></div>
+    </div>
+    <div class="summary-section" id="topic-summary">
+      <h3>Performance by Question Type</h3>
+      <div id="topic-rows"></div>
+    </div>
+    <div class="summary-section" id="missed-section">
+      <h3>Questions to Review</h3>
+      <div id="missed-list"></div>
+    </div>
+    <button class="restart-btn" onclick="restartQuiz()">Retake Quiz</button>
+  </div>
+</div>
+
+<script>
+const L = ['a','b','c','d','e'];
+const TOPIC_LABELS = {
+  "query-interpret":  "Query Interpretation (AND / OR / IN)",
+  "subject-shift":    "Subject & Scope (correlated EXISTS)",
+  "any-vs-specific":  "Any vs. Specific Item",
+  "query-equiv":      "Query Equivalence & Duplicates",
+  "aggregate":        "Aggregation (GROUP BY / HAVING)",
+  "schema-reason":    "Schema Reasoning (PK / FK / nulls)",
+  "cardinality":      "Cardinality",
+  "fill-in":          "Fill in the Blank",
+  "negation":         "Negation (NOT IN / NOT EXISTS)"
+};
+
+const Qs = [
+  // ── QUERY INTERPRETATION ─────────────────────────────────────────
+  {
+    type:"query-interpret", typeLabel:"Query Interpretation",
+    text:"What does the following query return?",
+    code:`SELECT s.name FROM students s\nWHERE s.dept = 'INLS' AND s.gpa > 3.5;`,
+    opts:["Names of students who are INLS majors or have a GPA above 3.5.",
+          "Names of students who are INLS majors and have a GPA above 3.5.",
+          "Names of students who have a GPA above 3.5 but are not INLS majors.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:1,
+    expl:"<span class='tag'>AND</span> Both conditions must be true simultaneously. A student must be in the INLS department AND have a GPA above 3.5."
+  },
+  {
+    type:"query-interpret", typeLabel:"Query Interpretation",
+    text:"What does the following query return?",
+    code:`SELECT s.name FROM students s\nWHERE s.year = 'junior' OR s.gpa < 2.0;`,
+    opts:["Names of juniors who also have a GPA below 2.0.",
+          "Names of students who are either juniors or have a GPA below 2.0.",
+          "Names of students who are juniors but do not have a GPA below 2.0.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:1,
+    expl:"<span class='tag'>OR</span> OR means either condition is sufficient. A student appears if they are a junior, OR if their GPA is below 2.0, OR both."
+  },
+  {
+    type:"query-interpret", typeLabel:"Query Interpretation",
+    text:"What does the following query return?",
+    code:`SELECT s.name FROM students s\nWHERE s.sid IN (\n  SELECT e.sid FROM enrolls e\n  WHERE e.semester = 'Fall2024');`,
+    opts:["Names of students who did not enroll in any course in Fall 2024.",
+          "Names of students enrolled in every course in Fall 2024.",
+          "Names of students enrolled in at least one course in Fall 2024.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:2,
+    expl:"<span class='tag'>IN / subquery</span> IN checks whether the student's sid appears anywhere in the subquery result — meaning they enrolled in at least one Fall 2024 course."
+  },
+  {
+    type:"query-interpret", typeLabel:"Query Interpretation",
+    text:"What does the following query return?",
+    code:`SELECT s.name FROM students s, enrolls e, courses c\nWHERE s.sid = e.sid AND e.cid = c.cid\n  AND c.dept = 'MATH';`,
+    opts:["Names of students who are enrolled in at least one MATH course.",
+          "Names of students who are not enrolled in any MATH course.",
+          "Names of MATH courses.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:0,
+    expl:"<span class='tag'>3-way join</span> The three-table join links students through enrolls to courses, then filters to MATH department courses. Result is students with at least one MATH enrollment."
+  },
+  {
+    type:"query-interpret", typeLabel:"Query Interpretation",
+    text:"What does the following query return?",
+    code:`SELECT s.name FROM students s\nWHERE s.sid NOT IN (\n  SELECT e.sid FROM enrolls e);`,
+    opts:["Names of students enrolled in at least one course.",
+          "Names of students who have never enrolled in any course.",
+          "Names of students enrolled in every course.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:1,
+    expl:"<span class='tag'>NOT IN</span> NOT IN excludes students whose sid appears anywhere in enrolls. The remaining students have zero enrollment records."
+  },
+  {
+    type:"query-interpret", typeLabel:"Query Interpretation",
+    text:"What does the following query return?",
+    code:`SELECT c.title FROM courses c\nWHERE c.credits = 3 OR c.dept = 'COMP';`,
+    opts:["Titles of 3-credit COMP courses only.",
+          "Titles of courses that are 3-credit courses or COMP courses (or both).",
+          "Titles of courses that are exactly 3 credits and not in COMP.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:1,
+    expl:"<span class='tag'>OR</span> OR includes rows where either condition is true. A course appears if it has 3 credits, or is in COMP dept, or both."
+  },
+
+  // ── NEGATION ─────────────────────────────────────────────────────
+  {
+    type:"negation", typeLabel:"Negation",
+    text:"What does the following query return?",
+    code:`SELECT s.name FROM students s\nWHERE s.gpa > 3.0 AND s.sid NOT IN (\n  SELECT e.sid FROM enrolls e\n  WHERE e.semester = 'Spring2024');`,
+    opts:["Names of students with GPA above 3.0 who enrolled in Spring 2024.",
+          "Names of students with GPA above 3.0 who did not enroll in any course in Spring 2024.",
+          "Names of students with GPA above 3.0 who dropped a course in Spring 2024.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:1,
+    expl:"<span class='tag'>NOT IN</span> NOT IN eliminates students whose sid appears in enrolls with semester = Spring2024 — regardless of which course. So it means they enrolled in no course at all that semester."
+  },
+  {
+    type:"negation", typeLabel:"Negation",
+    text:"What does the following query return?",
+    code:`SELECT p.name FROM professors p\nWHERE NOT EXISTS (\n  SELECT * FROM teaches t\n  WHERE t.prof_id = p.prof_id);`,
+    opts:["Names of professors who teach at least one course.",
+          "Names of professors who teach no courses.",
+          "Names of professors who teach in every semester.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:1,
+    expl:"<span class='tag'>NOT EXISTS</span> NOT EXISTS returns true when the subquery finds no rows. Here it finds professors for whom no row exists in teaches — professors who teach nothing."
+  },
+  {
+    type:"negation", typeLabel:"Negation",
+    text:"What does the following query return?",
+    code:`SELECT c.title FROM courses c\nWHERE c.cid NOT IN (\n  SELECT t.cid FROM teaches t\n  WHERE t.semester = 'Fall2024');`,
+    opts:["Titles of courses taught in Fall 2024.",
+          "Titles of courses not taught by anyone in Fall 2024.",
+          "Titles of courses taught by at least one professor in Fall 2024.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:1,
+    expl:"<span class='tag'>NOT IN</span> The subquery collects cids taught in Fall2024. NOT IN keeps courses whose cid does not appear there — meaning no professor taught them in Fall 2024."
+  },
+
+  // ── SUBJECT / SCOPE ───────────────────────────────────────────────
+  {
+    type:"subject-shift", typeLabel:"Subject & Scope",
+    text:"What does the following query return?",
+    code:`SELECT s.name FROM students s, enrolls e\nWHERE s.sid = e.sid AND NOT EXISTS (\n  SELECT * FROM teaches t\n  WHERE t.cid = e.cid);`,
+    opts:["Names of students enrolled in a course that has no assigned professor.",
+          "Names of students who have not been taught by any professor.",
+          "Names of students enrolled in a course they are not a professor for.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:0,
+    expl:"<span class='tag'>NOT EXISTS / scope</span> The subquery references <em>t.cid = e.cid</em> only — it checks whether that specific course has any row in teaches. No prof_id filter means the question is about the course, not the student."
+  },
+  {
+    type:"subject-shift", typeLabel:"Subject & Scope",
+    text:"What does the following query return?",
+    code:`SELECT s.name FROM students s, enrolls e\nWHERE s.sid = e.sid AND NOT EXISTS (\n  SELECT * FROM teaches t\n  WHERE t.cid = e.cid\n    AND t.prof_id IN (\n      SELECT p.prof_id FROM professors p\n      WHERE p.dept = s.dept));`,
+    opts:["Names of students enrolled in a course taught by a professor from the student's own department.",
+          "Names of students enrolled in a course not taught by any professor from the student's own department.",
+          "Names of students enrolled in a course with no professor assigned.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:1,
+    expl:"<span class='tag'>Correlated NOT EXISTS</span> The subquery checks if the enrolled course is taught by a professor in the same dept as the student (s.dept). NOT EXISTS keeps pairs where no such professor teaches that course."
+  },
+  {
+    type:"subject-shift", typeLabel:"Subject & Scope",
+    text:"What does the following query return?",
+    code:`SELECT s.name FROM students s, enrolls e\nWHERE s.sid = e.sid AND EXISTS (\n  SELECT * FROM teaches t\n  WHERE t.cid = e.cid AND t.prof_id IN (\n    SELECT p.prof_id FROM professors p\n    WHERE p.rank = 'full'));`,
+    opts:["Names of students enrolled in at least one course taught by a full professor.",
+          "Names of students who are full professors.",
+          "Names of students enrolled in every course taught by a full professor.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:0,
+    expl:"<span class='tag'>EXISTS / correlated</span> EXISTS fires for each (student, enrollment) pair. The subquery checks whether that course has a full professor in teaches. Result: students with at least one such course."
+  },
+
+  // ── ANY VS. SPECIFIC ─────────────────────────────────────────────
+  {
+    type:"any-vs-specific", typeLabel:"Any vs. Specific",
+    text:"What does the following query return?",
+    code:`SELECT s.name FROM students s, enrolls e, courses c\nWHERE s.sid = e.sid AND e.cid = c.cid\n  AND c.credits = 4\n  AND s.sid NOT IN (\n    SELECT e2.sid FROM enrolls e2\n    WHERE e2.grade = 'F');`,
+    opts:["Names of students taking a 4-credit course who did not fail that specific 4-credit course.",
+          "Names of students taking a 4-credit course who have not received an F in any course.",
+          "Names of students who have never taken a 4-credit course and have no F grades.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:1,
+    expl:"<span class='tag'>Any vs. specific</span> The NOT IN subquery has no credits filter — it excludes students with an F in <em>any</em> course, not just the 4-credit one. Option a) would require filtering the subquery by the specific cid."
+  },
+  {
+    type:"any-vs-specific", typeLabel:"Any vs. Specific",
+    text:"What does the following query return?",
+    code:`SELECT p.name FROM professors p, teaches t\nWHERE p.prof_id = t.prof_id\n  AND p.prof_id NOT IN (\n    SELECT t2.prof_id FROM teaches t2\n    WHERE t2.semester = 'Fall2024');`,
+    opts:["Names of professors who did not teach their current course in Fall 2024.",
+          "Names of professors who did not teach any course in Fall 2024.",
+          "Names of professors who taught at least one course in Fall 2024.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:1,
+    expl:"<span class='tag'>Any vs. specific</span> NOT IN eliminates any professor who appears in teaches with semester = Fall2024, regardless of which course. The result is professors with no Fall 2024 teaching assignment at all."
+  },
+  {
+    type:"any-vs-specific", typeLabel:"Any vs. Specific",
+    text:"What does the following query return?",
+    code:`SELECT s.name FROM students s, enrolls e\nWHERE s.sid = e.sid\n  AND e.semester = 'Spring2023'\n  AND s.sid NOT IN (\n    SELECT e2.sid FROM enrolls e2, courses c\n    WHERE e2.cid = c.cid\n      AND c.dept = 'INLS'\n      AND e2.semester = 'Spring2023');`,
+    opts:["Names of students enrolled in Spring 2023 who took no INLS course in Spring 2023.",
+          "Names of students enrolled in Spring 2023 who did not take the specific course they are enrolled in from INLS.",
+          "Names of students not enrolled in any Spring 2023 course.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:0,
+    expl:"<span class='tag'>Any vs. specific</span> The NOT IN subquery filters to INLS courses in Spring2023. So it excludes students who took <em>any</em> INLS course that semester — leaving students with Spring2023 enrollments in non-INLS courses only."
+  },
+
+  // ── QUERY EQUIVALENCE ────────────────────────────────────────────
+  {
+    type:"query-equiv", typeLabel:"Query Equivalence",
+    text:"Do the two queries below produce the same result?",
+    code:`-- Query A\nSELECT s.name FROM students s, enrolls e\nWHERE s.sid = e.sid AND e.grade = 'A';\n\n-- Query B\nSELECT s.name FROM students s\nWHERE s.sid IN (\n  SELECT e.sid FROM enrolls e\n  WHERE e.grade = 'A');`,
+    opts:["Yes — both always return identical rows.",
+          "No — Query A may return duplicate names; Query B returns one row per student.",
+          "No — they filter on different attributes.",
+          "No — Query B would produce an error."],
+    ans:1,
+    expl:"<span class='tag'>Duplicates</span> Query A returns one row per (student, A-grade course) — a student with multiple A grades appears multiple times. Query B uses IN and returns one row per student."
+  },
+  {
+    type:"query-equiv", typeLabel:"Query Equivalence",
+    text:"Do the two queries below produce the same result?",
+    code:`-- Query A\nSELECT s.name FROM students s\nWHERE s.sid IN (\n  SELECT e.sid FROM enrolls e\n  WHERE e.cid IN (\n    SELECT c.cid FROM courses c\n    WHERE c.dept = 'COMP'));\n\n-- Query B\nSELECT s.name FROM students s, enrolls e, courses c\nWHERE s.sid = e.sid AND e.cid = c.cid\n  AND c.dept = 'COMP';`,
+    opts:["Yes — both return the same set of distinct names.",
+          "No — Query A may produce duplicates; Query B returns distinct names.",
+          "No — Query B may produce duplicates; Query A returns distinct names.",
+          "No — Query A would produce an error."],
+    ans:2,
+    expl:"<span class='tag'>Duplicates</span> Query B is the join — it returns one row per (student, COMP course) pair, potentially duplicating student names. Query A uses nested IN and returns one row per student."
+  },
+
+  // ── AGGREGATION ──────────────────────────────────────────────────
+  {
+    type:"aggregate", typeLabel:"Aggregation",
+    text:"Which query correctly returns each department's average student GPA, only for departments where that average is above 3.2?",
+    code:null,
+    opts:["SELECT dept, AVG(gpa) FROM students WHERE AVG(gpa) > 3.2 GROUP BY dept;",
+          "SELECT dept, AVG(gpa) FROM students GROUP BY dept HAVING AVG(gpa) > 3.2;",
+          "SELECT dept, AVG(gpa) FROM students GROUP BY dept HAVING gpa > 3.2;",
+          "SELECT dept, AVG(gpa) FROM students HAVING AVG(gpa) > 3.2;"],
+    ans:1,
+    expl:"<span class='tag'>HAVING</span> Filtering on an aggregate must use HAVING, not WHERE. HAVING comes after GROUP BY and operates on group-level results."
+  },
+  {
+    type:"aggregate", typeLabel:"Aggregation",
+    text:"Which query correctly counts how many students are enrolled in each course, listing only courses with more than 20 enrolled students?",
+    code:null,
+    opts:["SELECT cid, COUNT(*) FROM enrolls WHERE COUNT(*) > 20 GROUP BY cid;",
+          "SELECT cid, COUNT(sid) FROM enrolls GROUP BY cid HAVING COUNT(sid) > 20;",
+          "SELECT cid, COUNT(*) FROM enrolls GROUP BY cid HAVING cid > 20;",
+          "SELECT cid, COUNT(*) FROM enrolls HAVING COUNT(*) > 20 GROUP BY cid;"],
+    ans:1,
+    expl:"<span class='tag'>COUNT / HAVING</span> Option b) correctly groups by course and uses HAVING to filter groups. Option a) illegally puts an aggregate in WHERE. Option d) has HAVING before GROUP BY which is invalid syntax."
+  },
+  {
+    type:"aggregate", typeLabel:"Aggregation",
+    text:"Which query correctly finds the highest GPA among students in each year level (freshman, sophomore, junior, senior)?",
+    code:null,
+    opts:["SELECT year, MAX(gpa) FROM students GROUP BY year;",
+          "SELECT year, MAX(gpa) FROM students WHERE gpa > 0 GROUP BY year;",
+          "SELECT year, MAX(gpa) FROM students HAVING MAX(gpa) GROUP BY year;",
+          "Both a) and b) produce the same result."],
+    ans:3,
+    expl:"<span class='tag'>MAX / GROUP BY</span> Both a) and b) produce the same logical result — the WHERE gpa > 0 in b) doesn't change anything meaningful assuming no negative GPAs. Both correctly compute MAX per year group."
+  },
+  {
+    type:"aggregate", typeLabel:"Aggregation",
+    text:"What does the following query return?",
+    code:`SELECT c.dept, COUNT(DISTINCT e.sid)\nFROM courses c, enrolls e\nWHERE c.cid = e.cid\nGROUP BY c.dept\nHAVING COUNT(DISTINCT e.sid) >= 50;`,
+    opts:["Departments where at least 50 courses are offered.",
+          "Departments where at least 50 distinct students are enrolled across all courses.",
+          "Departments where each course has at least 50 students.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:1,
+    expl:"<span class='tag'>COUNT DISTINCT / GROUP BY</span> Grouping by dept and counting DISTINCT student ids gives the total unique students enrolled in any course in each department. HAVING filters to departments with at least 50."
+  },
+  {
+    type:"aggregate", typeLabel:"Aggregation",
+    text:"Which query correctly computes the average grade (as a number) per student, counting only courses where the student received a grade of 'B' or higher?",
+    code:null,
+    opts:["SELECT sid, AVG(grade) FROM enrolls WHERE grade >= 'B' GROUP BY sid;",
+          "SELECT sid, AVG(grade) FROM enrolls GROUP BY sid HAVING grade >= 'B';",
+          "SELECT sid, AVG(grade) FROM enrolls GROUP BY sid HAVING AVG(grade) >= 'B';",
+          "None of the above — grade comparisons with strings like 'B' are unreliable for averaging."],
+    ans:3,
+    expl:"<span class='tag'>WHERE vs HAVING</span> If grade is stored as a string ('A','B','C'), AVG() on it is meaningless. The best answer is d) — however, if grade were numeric, option a) would correctly use WHERE to filter rows before grouping."
+  },
+
+  // ── SCHEMA REASONING ─────────────────────────────────────────────
+  {
+    type:"schema-reason", typeLabel:"Schema Reasoning",
+    text:"Can a student enroll in the same course more than once (in different semesters)?",
+    code:null,
+    opts:["Yes — (sid, cid) is the PK of enrolls, so the same pair can appear multiple times.",
+          "No — (sid, cid) is the PK so the same pair can only appear once.",
+          "Yes — semester is not part of the PK, but that doesn't affect uniqueness of (sid, cid).",
+          "Cannot be determined."],
+    ans:1,
+    expl:"<span class='tag'>Primary key</span> The PK of enrolls is (sid, cid). PKs must be unique, so the same student-course pair can appear exactly once. If semester were part of the PK, re-enrollment would be possible."
+  },
+  {
+    type:"schema-reason", typeLabel:"Schema Reasoning",
+    text:"Can a course be taught by more than one professor in the same semester?",
+    code:null,
+    opts:["No — (prof_id, cid) is the PK of teaches so each course maps to one professor.",
+          "Yes — the PK is (prof_id, cid), so different professors can each have a row for the same cid.",
+          "No — cid is a primary key in courses so it can only appear once across all tables.",
+          "Cannot be determined."],
+    ans:1,
+    expl:"<span class='tag'>PK / schema reading</span> The PK is (prof_id, cid). Two rows with the same cid but different prof_id values are perfectly valid — different professors teach the same course."
+  },
+  {
+    type:"schema-reason", typeLabel:"Schema Reasoning",
+    text:"Can a course exist in the courses table with no rows in enrolls?",
+    code:null,
+    opts:["No — referential integrity requires every course to have at least one enrollment.",
+          "Yes — referential integrity only prevents enrolls from referencing a non-existent course, not the reverse.",
+          "No — cid in courses is a foreign key referencing enrolls.",
+          "Yes — but only if capacity is 0."],
+    ans:1,
+    expl:"<span class='tag'>Referential integrity direction</span> The FK arrow goes from enrolls.cid to courses.cid. This prevents bad references in enrolls, but courses can exist with no enrollment rows at all."
+  },
+  {
+    type:"schema-reason", typeLabel:"Schema Reasoning",
+    text:"Based on the schema, can a professor teach a course without any students being enrolled in it?",
+    code:null,
+    opts:["No — teaches and enrolls share cid so they must have matching rows.",
+          "Yes — teaches and enrolls are separate tables with no direct FK between them.",
+          "No — the teaches table requires an enrollment record to be created first.",
+          "Cannot be determined."],
+    ans:1,
+    expl:"<span class='tag'>Table independence</span> teaches and enrolls both reference courses.cid, but there is no FK between teaches and enrolls directly. A professor can have a row in teaches with no corresponding rows in enrolls."
+  },
+
+  // ── CARDINALITY ──────────────────────────────────────────────────
+  {
+    type:"cardinality", typeLabel:"Cardinality",
+    text:"What is the cardinality of the relationship between STUDENTS and COURSES (via enrolls)?",
+    code:null,
+    opts:["1-1", "1-N", "N-M (many students can enroll in many courses)", "Cannot be determined"],
+    ans:2,
+    expl:"<span class='tag'>Cardinality</span> A student can enroll in many courses, and a course can have many students. The enrolls table is a junction table — classic N-M relationship."
+  },
+  {
+    type:"cardinality", typeLabel:"Cardinality",
+    text:"What is the cardinality of the relationship between PROFESSORS and COURSES (via teaches)?",
+    code:null,
+    opts:["1-1", "1-N (one professor teaches many courses)", "N-M (many professors can teach many courses)", "Cannot be determined"],
+    ans:2,
+    expl:"<span class='tag'>Cardinality</span> A professor can teach many courses, and a course can be taught by many professors. The teaches table allows both — N-M."
+  },
+  {
+    type:"cardinality", typeLabel:"Cardinality",
+    text:"What is the cardinality of the relationship between STUDENTS and ENROLLS?",
+    code:null,
+    opts:["1-1 (one student maps to one enrollment row)", "1-N (one student can have many enrollment rows)", "N-M", "Cannot be determined"],
+    ans:1,
+    expl:"<span class='tag'>Cardinality</span> A single student (one sid) can appear in many rows in enrolls — one per course enrolled. The relationship from students to enrolls is 1-N."
+  },
+
+  // ── FILL IN THE BLANK ────────────────────────────────────────────
+  {
+    type:"fill-in", typeLabel:"Fill in the Blank",
+    text:"Fill in the blank to list names of students who are enrolled in at least one COMP course.",
+    code:`SELECT s.name FROM students s\nWHERE s.sid IN (\n  SELECT e.sid FROM enrolls e, courses c\n  WHERE e.cid = c.cid\n    AND ________________);`,
+    opts:["a) c.dept != 'COMP'",
+          "b) c.dept = 'COMP'",
+          "c) s.dept = 'COMP'",
+          "d) e.sid = c.cid",
+          "e) none of the above"],
+    ans:1,
+    expl:"<span class='tag'>Subquery filter</span> The subquery joins enrolls and courses and needs to filter to COMP department courses. That filter belongs on the courses table: c.dept = 'COMP'."
+  },
+  {
+    type:"fill-in", typeLabel:"Fill in the Blank",
+    text:"Fill in the blank to list names and ranks of professors who have taught at least one course in the INLS department.",
+    code:`SELECT p.name, p.rank\nFROM professors p, teaches t, courses c\nWHERE p.prof_id = t.prof_id\n  AND ________________\n  AND c.dept = 'INLS';`,
+    opts:["a) t.cid = p.prof_id",
+          "b) t.cid = c.cid",
+          "c) p.dept = c.dept",
+          "d) t.prof_id = c.cid",
+          "e) none of the above"],
+    ans:1,
+    expl:"<span class='tag'>JOIN condition</span> The missing condition connects teaches to courses using their shared attribute: t.cid = c.cid."
+  },
+  {
+    type:"fill-in", typeLabel:"Fill in the Blank",
+    text:"Fill in the blank to list names of students who have never received a grade of 'F'.",
+    code:`SELECT s.name FROM students s\nWHERE ________________ (\n  SELECT * FROM enrolls e\n  WHERE e.sid = s.sid AND e.grade = 'F');`,
+    opts:["a) EXISTS",
+          "b) NOT EXISTS",
+          "c) s.sid IN",
+          "d) s.sid NOT IN",
+          "e) none of the above"],
+    ans:1,
+    expl:"<span class='tag'>NOT EXISTS</span> The subquery is correlated (references s.sid), so NOT EXISTS is the right operator. It returns students for whom no F-grade row exists in enrolls."
+  },
+  {
+    type:"fill-in", typeLabel:"Fill in the Blank",
+    text:"Fill in X and Y to list the number of courses taught per professor, showing only professors who teach more than 2 courses.",
+    code:`SELECT p.name, COUNT(*)\nFROM professors p, teaches t\nWHERE p.prof_id = t.prof_id\nGROUP BY p.prof_id, p.name\n___X___  ___Y___;`,
+    opts:["a) X: HAVING   Y: COUNT(*) > 2",
+          "b) X: WHERE   Y: COUNT(*) > 2",
+          "c) X: HAVING   Y: p.prof_id > 2",
+          "d) X: ORDER BY   Y: COUNT(*) > 2",
+          "e) none of the above"],
+    ans:0,
+    expl:"<span class='tag'>HAVING</span> Filtering on COUNT(*) must use HAVING (after GROUP BY), not WHERE. HAVING COUNT(*) > 2 keeps only groups — professors — with more than 2 teaching rows."
+  },
+  {
+    type:"fill-in", typeLabel:"Fill in the Blank",
+    text:"Fill in the blank to list sids of students who are enrolled in BOTH cid 101 and cid 202.",
+    code:`SELECT e1.sid FROM enrolls e1, enrolls e2\nWHERE ________________\n  AND e1.cid = 101 AND e2.cid = 202;`,
+    opts:["a) e1.sid != e2.sid",
+          "b) e1.cid = e2.cid",
+          "c) e1.sid = e2.sid",
+          "d) e1.grade = e2.grade",
+          "e) none of the above"],
+    ans:2,
+    expl:"<span class='tag'>Self-join</span> Aliasing enrolls twice lets us require the same student (e1.sid = e2.sid) to appear in a row for course 101 and a row for course 202."
+  },
+  {
+    type:"fill-in", typeLabel:"Fill in the Blank",
+    text:"Fill in the blank to list names of courses that have no professor assigned in any semester.",
+    code:`SELECT c.title FROM courses c\nWHERE c.cid ________________ (\n  SELECT t.cid FROM teaches t);`,
+    opts:["a) IN",
+          "b) NOT IN",
+          "c) EXISTS",
+          "d) NOT EXISTS",
+          "e) none of the above"],
+    ans:1,
+    expl:"<span class='tag'>NOT IN</span> The subquery returns all cids that appear in teaches. NOT IN keeps courses whose cid does not appear there — meaning they have no teaching assignment."
+  }
+];
+
+let cur = 0, score = 0;
+let answered = new Array(Qs.length).fill(false);
+let selected = new Array(Qs.length).fill(null);
+
+function renderQ(idx) {
+  const q = Qs[idx];
+  const pct = Math.round((idx / Qs.length) * 100);
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-label').textContent = 'Question ' + (idx+1) + ' of ' + Qs.length;
+  const doneCount = answered.filter(Boolean).length;
+  document.getElementById('score-label').textContent = doneCount + ' answered';
+  document.getElementById('score-num').textContent = score;
+  document.getElementById('score-den').textContent = doneCount;
+
+  const opts = q.opts.map((o, i) => {
+    let cls = 'opt-btn';
+    let dis = '';
+    if (answered[idx]) {
+      dis = 'disabled';
+      if (i === q.ans) cls += ' correct';
+      else if (i === selected[idx] && selected[idx] !== q.ans) cls += ' wrong';
+    }
+    return '<button class="' + cls + '" ' + dis + ' onclick="pick(' + idx + ',' + i + ')">' +
+           '<span class="opt-letter">' + L[i] + ')</span>' + o + '</button>';
+  }).join('');
+
+  const exStyle = answered[idx] ? 'display:block' : 'display:none';
+  document.getElementById('q-area').innerHTML =
+    '<div class="q-card">' +
+      '<div class="q-label"><span class="type-tag">' + q.typeLabel + '</span> Q' + (idx+1) + '</div>' +
+      '<div class="q-text">' + q.text + '</div>' +
+      (q.code ? '<div class="code-block">' + q.code + '</div>' : '') +
+      '<div class="options">' + opts + '</div>' +
+      '<div class="explanation" id="expl" style="' + exStyle + '">' + q.expl + '</div>' +
+    '</div>';
+
+  document.getElementById('btn-prev').disabled = idx === 0;
+  const nxt = document.getElementById('btn-next');
+  nxt.disabled = !answered[idx];
+  if (idx === Qs.length - 1) {
+    nxt.textContent = 'See Results →';
+    nxt.onclick = showResults;
+  } else {
+    nxt.textContent = 'Next →';
+    nxt.onclick = function(){ navigate(1); };
+  }
+}
+
+function pick(idx, choice) {
+  if (answered[idx]) return;
+  answered[idx] = true;
+  selected[idx] = choice;
+  if (choice === Qs[idx].ans) score++;
+  renderQ(idx);
+  const expl = document.getElementById('expl');
+  if (expl) expl.style.display = 'block';
+}
+
+function navigate(dir) {
+  cur = Math.max(0, Math.min(Qs.length - 1, cur + dir));
+  renderQ(cur);
+}
+
+function showResults() {
+  document.getElementById('quiz-wrap').style.display = 'none';
+  const res = document.getElementById('results-wrap');
+  res.style.display = 'block';
+
+  const pct = Math.round((score / Qs.length) * 100);
+  document.getElementById('res-score').textContent = score + ' / ' + Qs.length;
+  document.getElementById('res-pct').textContent = pct + '%';
+  document.getElementById('res-msg').textContent =
+    pct >= 85 ? "Strong performance — you have a solid command of these concepts." :
+    pct >= 65 ? "Good foundation. Focus on the question types flagged below." :
+    "Keep studying — pay close attention to the Focus areas below before your exam.";
+
+  // Topic breakdown
+  const tm = {};
+  Qs.forEach((q, i) => {
+    if (!tm[q.type]) tm[q.type] = { c: 0, t: 0 };
+    tm[q.type].t++;
+    if (selected[i] === q.ans) tm[q.type].c++;
+  });
+  let rowsHTML = '';
+  Object.keys(tm).forEach(type => {
+    const d = tm[type];
+    const p = Math.round((d.c / d.t) * 100);
+    const barColor = p >= 80 ? '#1e8449' : p >= 50 ? '#d35400' : '#c0392b';
+    const badgeCls = p >= 80 ? 'strong' : p >= 50 ? 'review' : 'focus';
+    const badgeTxt = p >= 80 ? 'Strong' : p >= 50 ? 'Review' : 'Focus Here';
+    rowsHTML +=
+      '<div class="topic-row">' +
+        '<span class="topic-name">' + TOPIC_LABELS[type] + '</span>' +
+        '<div class="topic-bar-wrap"><div class="topic-bar" style="width:' + p + '%;background:' + barColor + '"></div></div>' +
+        '<span class="topic-score-label">' + d.c + '/' + d.t + '</span>' +
+        '<span class="badge ' + badgeCls + '">' + badgeTxt + '</span>' +
+      '</div>';
+  });
+  document.getElementById('topic-rows').innerHTML = rowsHTML;
+
+  // Missed questions
+  const missed = Qs.filter((q, i) => selected[i] !== q.ans);
+  const missedSec = document.getElementById('missed-section');
+  if (missed.length === 0) {
+    missedSec.innerHTML = '<h3>Questions to Review</h3><p style="color:var(--green);font-size:0.88rem;padding:8px 0;">Perfect score — nothing to review!</p>';
+  } else {
+    let mHTML = '';
+    missed.forEach(q => {
+      const qi = Qs.indexOf(q);
+      const yourAns = selected[qi] !== null ? L[selected[qi]] + ') ' + q.opts[selected[qi]] : '(not answered)';
+      const rightAns = L[q.ans] + ') ' + q.opts[q.ans];
+      const codeSnippet = q.code ? '<div style="font-family:monospace;font-size:0.68rem;color:var(--muted);margin:4px 0;white-space:pre-wrap;">' + q.code.substring(0, 140) + (q.code.length > 140 ? '…' : '') + '</div>' : '';
+      mHTML +=
+        '<div class="missed-item">' +
+          '<div class="missed-q-ref">Q' + (qi+1) + ' &mdash; ' + q.typeLabel + '</div>' +
+          '<div style="font-size:0.81rem;margin-bottom:3px;">' + q.text + '</div>' +
+          codeSnippet +
+          '<div class="missed-wrong">&#10007; You chose: ' + yourAns + '</div>' +
+          '<div class="missed-right">&#10003; Correct: ' + rightAns + '</div>' +
+          '<div class="missed-expl">' + q.expl.replace(/<[^>]+>/g, '') + '</div>' +
+        '</div>';
+    });
+    document.getElementById('missed-list').innerHTML = mHTML;
+    missedSec.querySelector('h3').textContent = 'Questions to Review (' + missed.length + ')';
+  }
+}
+
+function restartQuiz() {
+  cur = 0; score = 0;
+  answered = new Array(Qs.length).fill(false);
+  selected = new Array(Qs.length).fill(null);
+  document.getElementById('results-wrap').style.display = 'none';
+  document.getElementById('quiz-wrap').style.display = 'block';
+  renderQ(0);
+}
+
+renderQ(0);
+</script>
+</body>
+</html>
