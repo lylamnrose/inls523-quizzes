@@ -29,4 +29,4 @@ I used AI as a tool to move from idea → working product quickly, while focusin
 
 ## Live Site
 
-[Add your GitHub Pages link here]
+https://lylamnrose.github.io/inls523-quizzes/index.html
