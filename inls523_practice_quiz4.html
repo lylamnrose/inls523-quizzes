@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>INLS 523 Practice Quiz 4</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #18181f;
+    --border: #25252f;
+    --accent: #a78bfa;
+    --accent2: #34d399;
+    --red: #f87171;
+    --orange: #fb923c;
+    --green: #34d399;
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+    --code-bg: #0d0d14;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'IBM Plex Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 28px 20px 60px; }
+  .container { max-width: 860px; margin: auto; }
+
+  header { margin-bottom: 26px; }
+  .header-top { display: flex; align-items: baseline; gap: 14px; margin-bottom: 4px; }
+  header h1 { font-family: 'Syne', sans-serif; font-size: 1.7rem; font-weight: 800; color: var(--text); letter-spacing: -0.01em; }
+  .pill { background: var(--accent); color: #0a0a0f; font-size: 0.68rem; font-weight: 700; padding: 2px 9px; border-radius: 20px; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.04em; text-transform: uppercase; }
+  header p { font-size: 0.8rem; color: var(--muted); font-weight: 300; }
+
+  .schema-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; margin-bottom: 22px; }
+  .schema-box h3 { font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 12px; }
+  .schema-tables { display: flex; flex-wrap: wrap; gap: 10px; }
+  .table-card { border: 1px solid var(--border); border-radius: 6px; overflow: hidden; min-width: 120px; flex: 1; }
+  .table-header { background: var(--accent); color: #0a0a0f; padding: 4px 10px; font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 0.72rem; }
+  .table-row { padding: 3px 10px; font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; color: var(--muted); border-top: 1px solid var(--border); }
+  .pk { text-decoration: underline; color: var(--accent); font-weight: 600; }
+  .fk { color: var(--accent2); }
+
+  .progress-wrap { margin-bottom: 18px; }
+  .progress-bar { width: 100%; height: 3px; background: var(--border); margin-bottom: 7px; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 0.4s ease; }
+  .progress-meta { display: flex; justify-content: space-between; font-size: 0.73rem; color: var(--muted); font-family: 'IBM Plex Mono', monospace; }
+
+  .q-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 14px; animation: fadeUp 0.2s ease; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:none; } }
+  .q-label { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .type-tag { font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); border: 1px solid var(--accent); padding: 1px 7px; border-radius: 3px; }
+  .q-num { font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; color: var(--muted); }
+  .q-text { font-size: 0.91rem; line-height: 1.65; margin-bottom: 12px; font-weight: 300; }
+
+  .code-block { background: var(--code-bg); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 0 6px 6px 0; padding: 12px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: #a8b8d8; white-space: pre; overflow-x: auto; margin-bottom: 14px; line-height: 1.7; }
+
+  .options { display: flex; flex-direction: column; gap: 6px; }
+  .opt-btn { text-align: left; padding: 10px 14px; border: 1px solid var(--border); border-radius: 7px; background: var(--surface2); color: var(--text); cursor: pointer; font-size: 0.83rem; font-family: 'IBM Plex Sans', sans-serif; font-weight: 300; line-height: 1.5; transition: border-color 0.12s, background 0.12s; }
+  .opt-btn:hover:not([disabled]) { border-color: var(--accent); background: #1a1a2e; }
+  .opt-btn.correct { background: #0d2018; border-color: var(--green); color: #86efca; }
+  .opt-btn.wrong { background: #200d0d; border-color: var(--red); color: #fca5a5; }
+  .opt-letter { font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; color: var(--muted); margin-right: 8px; }
+  .opt-btn.correct .opt-letter { color: var(--green); }
+  .opt-btn.wrong .opt-letter { color: var(--red); }
+
+  .explanation { margin-top: 12px; padding: 11px 14px; background: #16100a; border-left: 3px solid var(--orange); border-radius: 0 6px 6px 0; font-size: 0.8rem; color: #d4b896; line-height: 1.65; font-weight: 300; display: none; }
+  .etag { display: inline-block; background: #2a1800; border: 1px solid var(--orange); color: var(--orange); font-size: 0.63rem; padding: 1px 6px; border-radius: 2px; margin-right: 6px; font-family: 'IBM Plex Mono', monospace; text-transform: uppercase; letter-spacing: 0.06em; vertical-align: middle; }
+
+  .nav { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+  .nav-btn { padding: 9px 22px; border: 1px solid var(--border); background: transparent; color: var(--muted); border-radius: 6px; cursor: pointer; font-family: 'IBM Plex Sans', sans-serif; font-size: 0.83rem; font-weight: 500; transition: all 0.12s; }
+  .nav-btn:hover:not([disabled]) { border-color: var(--text); color: var(--text); }
+  .nav-btn:disabled { opacity: 0.3; cursor: default; }
+  .nav-btn.primary { border-color: var(--accent); color: var(--accent); }
+  .nav-btn.primary:hover:not([disabled]) { background: var(--accent); color: #0a0a0f; }
+  .score-pill { font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; color: var(--muted); }
+  .score-pill span { color: var(--text); }
+
+  /* Results */
+  .results { display: none; }
+  .results-hero { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 36px 28px; text-align: center; margin-bottom: 18px; }
+  .results-hero h2 { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+  .score-display { font-family: 'IBM Plex Mono', monospace; font-size: 4.5rem; font-weight: 600; color: var(--accent); line-height: 1; margin: 20px 0 8px; }
+  .score-pct { font-family: 'IBM Plex Mono', monospace; font-size: 0.88rem; color: var(--muted); margin-bottom: 12px; }
+  .res-msg { font-size: 0.88rem; color: var(--muted); max-width: 420px; margin: 0 auto; line-height: 1.6; font-weight: 300; }
+
+  .summary-section { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px 22px; margin-bottom: 14px; }
+  .summary-section h3 { font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 16px; }
+  .topic-row { display: flex; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); gap: 10px; }
+  .topic-row:last-child { border-bottom: none; }
+  .topic-name { font-size: 0.82rem; flex: 1.2; font-weight: 300; }
+  .topic-bar-wrap { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .topic-bar { height: 100%; border-radius: 2px; transition: width 0.7s ease; }
+  .topic-score-label { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: var(--muted); min-width: 36px; text-align: right; }
+  .badge { font-family: 'IBM Plex Mono', monospace; font-size: 0.62rem; padding: 2px 8px; border-radius: 3px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; min-width: 74px; text-align: center; }
+  .badge.strong { background: #0d2018; color: var(--green); border: 1px solid var(--green); }
+  .badge.review { background: #1e1008; color: var(--orange); border: 1px solid var(--orange); }
+  .badge.focus { background: #200d0d; color: var(--red); border: 1px solid var(--red); }
+
+  .missed-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 13px 15px; margin-bottom: 8px; font-size: 0.8rem; line-height: 1.6; }
+  .missed-q-ref { font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; color: var(--accent2); margin-bottom: 4px; }
+  .missed-wrong { color: var(--red); margin-bottom: 2px; font-size: 0.79rem; }
+  .missed-right { color: var(--green); margin-bottom: 5px; font-size: 0.79rem; }
+  .missed-expl { color: var(--muted); font-weight: 300; font-size: 0.77rem; }
+
+  .restart-btn { display: block; margin: 20px auto 0; padding: 10px 32px; background: transparent; border: 1px solid var(--accent); color: var(--accent); border-radius: 6px; cursor: pointer; font-family: 'IBM Plex Sans', sans-serif; font-size: 0.88rem; font-weight: 500; transition: background 0.12s, color 0.12s; }
+  .restart-btn:hover { background: var(--accent); color: #0a0a0f; }
+</style>
+</head>
+<body>
+  <div style="display:flex; gap:15px; justify-content:center; margin-bottom:20px;">
+    <a href="index.html">Quiz 1</a>
+    <a href="inls523_practice_quiz2.html">Quiz 2</a>
+    <a href="inls523_practice_quiz3.html">Quiz 3</a>
+    <a href="inls523_practice_quiz4.html">Quiz 4</a>
+  </div>
+<div class="container">
+  <header>
+    <div class="header-top">
+      <h1>INLS 523 — Practice Quiz 4</h1>
+      <span class="pill">34 questions</span>
+    </div>
+    <p>Music streaming database &bull; SQL queries, EXISTS/NOT EXISTS, aggregation, schema reasoning, fill-in-the-blank</p>
+  </header>
+
+  <div class="schema-box">
+    <h3>Relational Schema</h3>
+    <div class="schema-tables">
+      <div class="table-card">
+        <div class="table-header">users</div>
+        <div class="table-row"><span class="pk">uid</span></div>
+        <div class="table-row">name</div>
+        <div class="table-row">age</div>
+        <div class="table-row">country</div>
+        <div class="table-row">plan</div>
+      </div>
+      <div class="table-card">
+        <div class="table-header">songs</div>
+        <div class="table-row"><span class="pk">sid</span></div>
+        <div class="table-row">title</div>
+        <div class="table-row">genre</div>
+        <div class="table-row">duration</div>
+        <div class="table-row">release_year</div>
+      </div>
+      <div class="table-card">
+        <div class="table-header">artists</div>
+        <div class="table-row"><span class="pk">aid</span></div>
+        <div class="table-row">name</div>
+        <div class="table-row">country</div>
+        <div class="table-row">genre</div>
+      </div>
+      <div class="table-card">
+        <div class="table-header">listens</div>
+        <div class="table-row"><span class="pk fk">uid</span> &rarr; users</div>
+        <div class="table-row"><span class="pk fk">sid</span> &rarr; songs</div>
+        <div class="table-row">listen_year</div>
+        <div class="table-row">rating</div>
+      </div>
+      <div class="table-card">
+        <div class="table-header">performs</div>
+        <div class="table-row"><span class="pk fk">aid</span> &rarr; artists</div>
+        <div class="table-row"><span class="pk fk">sid</span> &rarr; songs</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="quiz-wrap">
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+      <div class="progress-meta">
+        <span id="prog-label">Question 1 of 34</span>
+        <span id="score-label">0 answered</span>
+      </div>
+    </div>
+    <div id="q-area"></div>
+    <div class="nav">
+      <button class="nav-btn" id="btn-prev" onclick="navigate(-1)" disabled>&larr; Prev</button>
+      <div class="score-pill">Score: <span id="score-num">0</span> / <span id="score-den">0</span></div>
+      <button class="nav-btn primary" id="btn-next" disabled>Next &rarr;</button>
+    </div>
+  </div>
+
+  <div class="results" id="results-wrap">
+    <div class="results-hero">
+      <h2>Quiz Complete</h2>
+      <div class="score-display" id="res-score"></div>
+      <div class="score-pct" id="res-pct"></div>
+      <div class="res-msg" id="res-msg"></div>
+    </div>
+    <div class="summary-section">
+      <h3>Performance by Question Type</h3>
+      <div id="topic-rows"></div>
+    </div>
+    <div class="summary-section" id="missed-section">
+      <h3>Questions to Review</h3>
+      <div id="missed-list"></div>
+    </div>
+    <button class="restart-btn" onclick="restartQuiz()">Retake Quiz</button>
+  </div>
+</div>
+
+<script>
+const L = ['a','b','c','d','e'];
+const TOPIC_LABELS = {
+  "query-interpret":  "Query Interpretation (AND / OR / IN)",
+  "subject-shift":    "Subject & Scope (correlated EXISTS)",
+  "any-vs-specific":  "Any vs. Specific Item",
+  "query-equiv":      "Query Equivalence & Duplicates",
+  "aggregate":        "Aggregation (GROUP BY / HAVING)",
+  "schema-reason":    "Schema Reasoning (PK / FK)",
+  "cardinality":      "Cardinality",
+  "fill-in":          "Fill in the Blank",
+  "negation":         "Negation (NOT IN / NOT EXISTS)"
+};
+
+const Qs = [
+  // ── QUERY INTERPRETATION ─────────────────────────────────────────
+  {
+    type:"query-interpret", typeLabel:"Query Interpretation",
+    text:"What does the following query return?",
+    code:`SELECT u.name FROM users u\nWHERE u.plan = 'premium' AND u.age < 25;`,
+    opts:["Names of users who are on the premium plan or are under 25.",
+          "Names of users who are on the premium plan and are under 25.",
+          "Names of users under 25 who are not on the premium plan.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:1,
+    expl:"<span class='etag'>AND</span> Both conditions must be true. The user must have a premium plan AND be under 25."
+  },
+  {
+    type:"query-interpret", typeLabel:"Query Interpretation",
+    text:"What does the following query return?",
+    code:`SELECT u.name FROM users u\nWHERE u.country = 'USA' OR u.plan = 'free';`,
+    opts:["Names of users who are from the USA and on the free plan.",
+          "Names of users who are from the USA or on the free plan (or both).",
+          "Names of users from the USA who are not on the free plan.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:1,
+    expl:"<span class='etag'>OR</span> OR means either condition alone is enough. A user appears if they are from the USA, on the free plan, or both."
+  },
+  {
+    type:"query-interpret", typeLabel:"Query Interpretation",
+    text:"What does the following query return?",
+    code:`SELECT u.name FROM users u\nWHERE u.uid IN (\n  SELECT l.uid FROM listens l\n  WHERE l.listen_year = 2023);`,
+    opts:["Names of users who listened to every song in 2023.",
+          "Names of users who did not listen to any song in 2023.",
+          "Names of users who listened to at least one song in 2023.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:2,
+    expl:"<span class='etag'>IN / subquery</span> IN checks whether the user's uid appears anywhere in the subquery result. Any user with at least one 2023 listen row is returned."
+  },
+  {
+    type:"query-interpret", typeLabel:"Query Interpretation",
+    text:"What does the following query return?",
+    code:`SELECT u.name FROM users u, listens l, songs s\nWHERE u.uid = l.uid AND l.sid = s.sid\n  AND s.genre = 'jazz';`,
+    opts:["Names of users who have listened to at least one jazz song.",
+          "Names of users who have only ever listened to jazz songs.",
+          "Names of jazz songs.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:0,
+    expl:"<span class='etag'>3-way join</span> The join links users through listens to songs, then filters to jazz. Result is users with at least one jazz listen row — not exclusively jazz listeners."
+  },
+  {
+    type:"query-interpret", typeLabel:"Query Interpretation",
+    text:"What does the following query return?",
+    code:`SELECT s.title FROM songs s\nWHERE s.release_year > 2020 OR s.genre = 'pop';`,
+    opts:["Titles of songs released after 2020 that are also pop songs.",
+          "Titles of songs released after 2020 or that are pop songs (or both).",
+          "Titles of pop songs released before 2020.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:1,
+    expl:"<span class='etag'>OR</span> Either condition is sufficient. A song appears if it was released after 2020, or is pop genre, or both."
+  },
+  {
+    type:"query-interpret", typeLabel:"Query Interpretation",
+    text:"What does the following query return?",
+    code:`SELECT u.name FROM users u\nWHERE u.uid IN (\n  SELECT l.uid FROM listens l\n  WHERE l.rating = 5);`,
+    opts:["Names of users who rated every song they listened to a 5.",
+          "Names of users who have given at least one song a rating of 5.",
+          "Names of users who have never given a rating of 5.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:1,
+    expl:"<span class='etag'>IN</span> IN just checks if the uid appears anywhere in the subquery list — meaning at least one listen row with rating = 5 exists for that user."
+  },
+
+  // ── NEGATION ─────────────────────────────────────────────────────
+  {
+    type:"negation", typeLabel:"Negation",
+    text:"What does the following query return?",
+    code:`SELECT u.name FROM users u\nWHERE u.uid NOT IN (\n  SELECT l.uid FROM listens l);`,
+    opts:["Names of users who have listened to at least one song.",
+          "Names of users who have never listened to any song.",
+          "Names of users who have listened to every song.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:1,
+    expl:"<span class='etag'>NOT IN</span> The subquery collects all uids that appear in listens. NOT IN keeps users whose uid does not appear there at all — meaning zero listens."
+  },
+  {
+    type:"negation", typeLabel:"Negation",
+    text:"What does the following query return?",
+    code:`SELECT a.name FROM artists a\nWHERE NOT EXISTS (\n  SELECT * FROM performs p\n  WHERE p.aid = a.aid);`,
+    opts:["Names of artists who perform at least one song.",
+          "Names of artists who perform no songs.",
+          "Names of artists who perform every song.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:1,
+    expl:"<span class='etag'>NOT EXISTS</span> The subquery checks whether this artist has any row in performs. NOT EXISTS is true when zero rows come back — artists with nothing in performs."
+  },
+  {
+    type:"negation", typeLabel:"Negation",
+    text:"What does the following query return?",
+    code:`SELECT u.name FROM users u\nWHERE u.age > 30\n  AND u.uid NOT IN (\n    SELECT l.uid FROM listens l\n    WHERE l.listen_year = 2022);`,
+    opts:["Names of users over 30 who listened to at least one song in 2022.",
+          "Names of users over 30 who listened to no songs in 2022.",
+          "Names of all users who never listened to any song.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:1,
+    expl:"<span class='etag'>NOT IN</span> The outer query gets users over 30. NOT IN removes anyone whose uid appears in listens with listen_year = 2022 — no matter which song. So: over-30 users with zero 2022 listens."
+  },
+  {
+    type:"negation", typeLabel:"Negation",
+    text:"What does the following query return?",
+    code:`SELECT s.title FROM songs s\nWHERE s.sid NOT IN (\n  SELECT p.sid FROM performs p);`,
+    opts:["Titles of songs performed by at least one artist.",
+          "Titles of songs not performed by any artist.",
+          "Titles of songs performed by every artist.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:1,
+    expl:"<span class='etag'>NOT IN</span> The subquery collects sids that appear in performs. NOT IN keeps songs whose sid is absent from performs — songs with no artist assigned."
+  },
+
+  // ── SUBJECT / SCOPE ───────────────────────────────────────────────
+  {
+    type:"subject-shift", typeLabel:"Subject & Scope",
+    text:"What does the following query return?",
+    code:`SELECT u.name FROM users u, listens l\nWHERE u.uid = l.uid AND NOT EXISTS (\n  SELECT * FROM performs p\n  WHERE p.sid = l.sid);`,
+    opts:["Names of users who have listened to a song that has no artist.",
+          "Names of users who have not listened to any song.",
+          "Names of users who have listened to a song they did not perform.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:0,
+    expl:"<span class='etag'>NOT EXISTS / scope</span> The subquery only references p.sid = l.sid — it checks whether the listened song has any artist in performs. The user's uid does not appear inside the subquery, so the condition is about the song, not the user."
+  },
+  {
+    type:"subject-shift", typeLabel:"Subject & Scope",
+    text:"What does the following query return?",
+    code:`SELECT u.name FROM users u, listens l\nWHERE u.uid = l.uid AND NOT EXISTS (\n  SELECT * FROM performs p\n  WHERE p.sid = l.sid\n    AND p.aid IN (\n      SELECT a.aid FROM artists a\n      WHERE a.country = u.country));`,
+    opts:["Names of users who have listened to a song with no artist from the user's own country.",
+          "Names of users who have never listened to any song.",
+          "Names of users who have listened to a song that has no artist assigned.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:0,
+    expl:"<span class='etag'>Correlated NOT EXISTS</span> The subquery checks whether the listened song is performed by an artist from the same country as the user (u.country). NOT EXISTS means no such artist exists for that song. Compare to the previous question — adding u.country ties it back to the user."
+  },
+  {
+    type:"subject-shift", typeLabel:"Subject & Scope",
+    text:"What does the following query return?",
+    code:`SELECT u.name FROM users u, listens l\nWHERE u.uid = l.uid AND EXISTS (\n  SELECT * FROM performs p, artists a\n  WHERE p.sid = l.sid AND p.aid = a.aid\n    AND a.genre = l.rating);`,
+    opts:["Names of users who have listened to a song whose artist's genre matches the user's rating value.",
+          "Names of users who have listened to a song by any artist.",
+          "Names of users who have rated a song exactly once.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:3,
+    expl:"<span class='etag'>Type mismatch</span> a.genre is a text field and l.rating is a numeric field. Comparing them with = would produce an error or meaningless results in most databases. This is a type mismatch."
+  },
+  {
+    type:"subject-shift", typeLabel:"Subject & Scope",
+    text:"What does the following query return?",
+    code:`SELECT u.name FROM users u, listens l\nWHERE u.uid = l.uid AND EXISTS (\n  SELECT * FROM performs p\n  WHERE p.sid = l.sid\n    AND p.aid IN (\n      SELECT a.aid FROM artists a\n      WHERE a.genre = 'rock'));`,
+    opts:["Names of users who have listened to at least one song performed by a rock artist.",
+          "Names of users who have only listened to rock songs.",
+          "Names of users who have never listened to a rock song.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:0,
+    expl:"<span class='etag'>EXISTS / correlated</span> EXISTS fires for each (user, listen) pair and checks if that song has a rock artist in performs. Result: users with at least one listen to a rock-performed song."
+  },
+
+  // ── ANY VS. SPECIFIC ─────────────────────────────────────────────
+  {
+    type:"any-vs-specific", typeLabel:"Any vs. Specific",
+    text:"What does the following query return?",
+    code:`SELECT u.name FROM users u, listens l, songs s\nWHERE u.uid = l.uid AND l.sid = s.sid\n  AND s.genre = 'pop'\n  AND u.uid NOT IN (\n    SELECT l2.uid FROM listens l2\n    WHERE l2.rating < 3);`,
+    opts:["Names of users who listened to a pop song but never gave that specific pop song a low rating.",
+          "Names of users who listened to a pop song and have never given any song a rating below 3.",
+          "Names of users who have never listened to any pop song.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:1,
+    expl:"<span class='etag'>Any vs. specific</span> The NOT IN subquery has no genre filter — it excludes users who gave a low rating to any song at all, not just the pop song. Option a) would require filtering the subquery to the same sid."
+  },
+  {
+    type:"any-vs-specific", typeLabel:"Any vs. Specific",
+    text:"What does the following query return?",
+    code:`SELECT a.name FROM artists a, performs p\nWHERE a.aid = p.aid\n  AND a.aid NOT IN (\n    SELECT p2.aid FROM performs p2, songs s\n    WHERE p2.sid = s.sid\n      AND s.release_year < 2000);`,
+    opts:["Names of artists who have not performed their current song before 2000.",
+          "Names of artists who have not performed any song released before 2000.",
+          "Names of artists who have only performed songs released before 2000.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:1,
+    expl:"<span class='etag'>Any vs. specific</span> NOT IN removes any artist who appears in performs with a pre-2000 song — regardless of which song. The result is artists with no pre-2000 songs in their catalog at all."
+  },
+  {
+    type:"any-vs-specific", typeLabel:"Any vs. Specific",
+    text:"What does the following query return?",
+    code:`SELECT u.name FROM users u, listens l\nWHERE u.uid = l.uid\n  AND l.listen_year = 2023\n  AND u.uid NOT IN (\n    SELECT l2.uid FROM listens l2, songs s\n    WHERE l2.sid = s.sid\n      AND s.genre = 'classical'\n      AND l2.listen_year = 2023);`,
+    opts:["Names of users who listened in 2023 but did not listen to any classical song in 2023.",
+          "Names of users who listened in 2023 but did not listen to their specific 2023 song in classical.",
+          "Names of users who have never listened to any classical song.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:0,
+    expl:"<span class='etag'>Any vs. specific</span> The NOT IN subquery filters to classical songs in 2023. So it excludes users who listened to any classical song in 2023 — leaving users with 2023 listens but zero classical ones that year."
+  },
+
+  // ── QUERY EQUIVALENCE ────────────────────────────────────────────
+  {
+    type:"query-equiv", typeLabel:"Query Equivalence",
+    text:"Do the two queries below produce the same result?",
+    code:`-- Query A\nSELECT u.name FROM users u, listens l\nWHERE u.uid = l.uid AND l.rating = 5;\n\n-- Query B\nSELECT u.name FROM users u\nWHERE u.uid IN (\n  SELECT l.uid FROM listens l\n  WHERE l.rating = 5);`,
+    opts:["Yes — both always return identical rows.",
+          "No — Query A may return duplicate names; Query B returns one row per user.",
+          "No — they filter on different attributes.",
+          "No — Query B would produce an error."],
+    ans:1,
+    expl:"<span class='etag'>Duplicates</span> Query A joins users and listens, returning one row per (user, 5-rated song). A user with multiple 5-star ratings appears multiple times. Query B uses IN and returns one row per user."
+  },
+  {
+    type:"query-equiv", typeLabel:"Query Equivalence",
+    text:"Do the two queries below produce the same result?",
+    code:`-- Query A\nSELECT u.name FROM users u\nWHERE u.uid IN (\n  SELECT l.uid FROM listens l\n  WHERE l.sid IN (\n    SELECT s.sid FROM songs s\n    WHERE s.genre = 'rock'));\n\n-- Query B\nSELECT u.name FROM users u, listens l, songs s\nWHERE u.uid = l.uid AND l.sid = s.sid\n  AND s.genre = 'rock';`,
+    opts:["Yes — both return the same set of distinct names.",
+          "No — Query A may produce duplicates; Query B does not.",
+          "No — Query B may produce duplicates; Query A returns one row per user.",
+          "No — Query A would produce an error."],
+    ans:2,
+    expl:"<span class='etag'>Duplicates</span> Query B is the direct join — it returns one row per (user, rock song) pair. A user who listened to three rock songs appears three times. Query A uses nested IN and returns one row per user."
+  },
+
+  // ── AGGREGATION ──────────────────────────────────────────────────
+  {
+    type:"aggregate", typeLabel:"Aggregation",
+    text:"Which query correctly returns each genre's average song duration, only for genres where the average duration is over 200 seconds?",
+    code:null,
+    opts:["SELECT genre, AVG(duration) FROM songs WHERE AVG(duration) > 200 GROUP BY genre;",
+          "SELECT genre, AVG(duration) FROM songs GROUP BY genre HAVING AVG(duration) > 200;",
+          "SELECT genre, AVG(duration) FROM songs GROUP BY genre HAVING duration > 200;",
+          "SELECT genre, AVG(duration) FROM songs HAVING AVG(duration) > 200;"],
+    ans:1,
+    expl:"<span class='etag'>HAVING</span> Filtering on an aggregate must use HAVING after GROUP BY. Option a) illegally puts AVG() in WHERE. Option c) uses a non-aggregate column in HAVING. Option d) has no GROUP BY."
+  },
+  {
+    type:"aggregate", typeLabel:"Aggregation",
+    text:"What does the following query return?",
+    code:`SELECT s.genre, COUNT(DISTINCT l.uid)\nFROM songs s, listens l\nWHERE s.sid = l.sid\nGROUP BY s.genre\nHAVING COUNT(DISTINCT l.uid) >= 100;`,
+    opts:["Genres where at least 100 songs exist.",
+          "Genres where at least 100 distinct users have listened to at least one song.",
+          "Genres where each song has at least 100 listeners.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:1,
+    expl:"<span class='etag'>COUNT DISTINCT / GROUP BY</span> Grouping by genre and counting DISTINCT user ids gives the total unique listeners across all songs in each genre. HAVING filters to genres with at least 100."
+  },
+  {
+    type:"aggregate", typeLabel:"Aggregation",
+    text:"Which query correctly counts how many songs each artist performs, listing only artists with more than 5 songs?",
+    code:null,
+    opts:["SELECT aid, COUNT(*) FROM performs WHERE COUNT(*) > 5 GROUP BY aid;",
+          "SELECT aid, COUNT(sid) FROM performs GROUP BY aid HAVING COUNT(sid) > 5;",
+          "SELECT aid, COUNT(*) FROM performs GROUP BY aid HAVING aid > 5;",
+          "SELECT aid, COUNT(*) FROM performs HAVING COUNT(*) > 5 GROUP BY aid;"],
+    ans:1,
+    expl:"<span class='etag'>COUNT / HAVING</span> Option b) correctly groups by artist and uses HAVING to filter. Option a) puts an aggregate in WHERE (invalid). Option d) has HAVING before GROUP BY (invalid syntax order)."
+  },
+  {
+    type:"aggregate", typeLabel:"Aggregation",
+    text:"Which query correctly finds the highest rating given to each song?",
+    code:null,
+    opts:["SELECT sid, MAX(rating) FROM listens GROUP BY sid;",
+          "SELECT sid, MAX(rating) FROM listens WHERE rating > 0 GROUP BY sid;",
+          "SELECT sid, MAX(rating) FROM listens HAVING MAX(rating) GROUP BY sid;",
+          "Both a) and b) produce the same result."],
+    ans:3,
+    expl:"<span class='etag'>MAX / GROUP BY</span> Both a) and b) produce the same result — the WHERE rating > 0 condition in b) doesn't change anything assuming no zero or negative ratings exist. Both correctly compute MAX per song."
+  },
+  {
+    type:"aggregate", typeLabel:"Aggregation",
+    text:"What does the following query return?",
+    code:`SELECT u.country, COUNT(DISTINCT u.uid)\nFROM users u, listens l\nWHERE u.uid = l.uid\n  AND l.listen_year = 2024\nGROUP BY u.country\nHAVING COUNT(DISTINCT u.uid) > 500;`,
+    opts:["Countries where more than 500 songs were listened to in 2024.",
+          "Countries where more than 500 distinct users listened to at least one song in 2024.",
+          "Countries where every user listened to more than 500 songs in 2024.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:1,
+    expl:"<span class='etag'>COUNT DISTINCT / HAVING</span> The query groups by country and counts distinct users who listened in 2024. HAVING filters to countries with more than 500 such users."
+  },
+
+  // ── SCHEMA REASONING ─────────────────────────────────────────────
+  {
+    type:"schema-reason", typeLabel:"Schema Reasoning",
+    text:"Can a user listen to the same song more than once?",
+    code:null,
+    opts:["Yes — (uid, sid) is the PK of listens, so the same pair can appear multiple times.",
+          "No — (uid, sid) is the PK so each user-song pair can only appear once.",
+          "Yes — listen_year is part of the PK so re-listens are allowed.",
+          "Cannot be determined."],
+    ans:1,
+    expl:"<span class='etag'>Primary key</span> The PK of listens is (uid, sid). PKs enforce uniqueness — the same user-song pair can appear exactly once. If listen_year were part of the PK, multiple listens would be possible."
+  },
+  {
+    type:"schema-reason", typeLabel:"Schema Reasoning",
+    text:"Can a song be performed by more than one artist?",
+    code:null,
+    opts:["No — (aid, sid) is the PK so each song maps to exactly one artist.",
+          "Yes — the PK is (aid, sid), so different artists can each have a row for the same sid.",
+          "No — sid is a primary key in songs so it can only appear once across all tables.",
+          "Cannot be determined."],
+    ans:1,
+    expl:"<span class='etag'>PK / schema reading</span> The PK is (aid, sid). Two rows with the same sid but different aid values are valid — multiple artists can perform the same song."
+  },
+  {
+    type:"schema-reason", typeLabel:"Schema Reasoning",
+    text:"Can a song exist in the songs table with no rows in performs?",
+    code:null,
+    opts:["No — referential integrity requires every song to have at least one artist.",
+          "Yes — referential integrity only prevents performs from referencing a non-existent song, not the reverse.",
+          "No — sid in songs is a foreign key referencing performs.",
+          "Yes — but only if duration is 0."],
+    ans:1,
+    expl:"<span class='etag'>Referential integrity direction</span> The FK arrow goes from performs.sid to songs.sid. This prevents bad references in performs but songs can exist with no performs rows at all."
+  },
+  {
+    type:"schema-reason", typeLabel:"Schema Reasoning",
+    text:"Based on the schema, can an artist exist in the artists table without performing any songs?",
+    code:null,
+    opts:["No — performs and artists share aid so they must have matching rows.",
+          "Yes — performs and artists are separate tables; an artist with no performs rows is valid.",
+          "No — the artists table requires a performs record to be created first.",
+          "Cannot be determined."],
+    ans:1,
+    expl:"<span class='etag'>Table independence</span> The FK in performs points to artists, not the other way. An artist can exist in artists with zero rows in performs."
+  },
+
+  // ── CARDINALITY ──────────────────────────────────────────────────
+  {
+    type:"cardinality", typeLabel:"Cardinality",
+    text:"What is the cardinality of the relationship between USERS and SONGS (via listens)?",
+    code:null,
+    opts:["1-1", "1-N", "N-M (many users can listen to many songs)", "Cannot be determined"],
+    ans:2,
+    expl:"<span class='etag'>Cardinality</span> A user can listen to many songs, and a song can be listened to by many users. The listens table is a junction table — classic N-M."
+  },
+  {
+    type:"cardinality", typeLabel:"Cardinality",
+    text:"What is the cardinality of the relationship between ARTISTS and SONGS (via performs)?",
+    code:null,
+    opts:["1-1", "1-N (one artist performs many songs)", "N-M (many artists can perform many songs)", "Cannot be determined"],
+    ans:2,
+    expl:"<span class='etag'>Cardinality</span> An artist can perform many songs, and a song can be performed by many artists. The performs table allows both — N-M."
+  },
+  {
+    type:"cardinality", typeLabel:"Cardinality",
+    text:"What is the cardinality of the relationship between USERS and LISTENS?",
+    code:null,
+    opts:["1-1 (one user maps to one listen row)", "1-N (one user can have many listen rows)", "N-M", "Cannot be determined"],
+    ans:1,
+    expl:"<span class='etag'>Cardinality</span> A single user (one uid) can appear in many rows in listens — one per song listened to. The relationship from users to listens is 1-N."
+  },
+
+  // ── FILL IN THE BLANK ────────────────────────────────────────────
+  {
+    type:"fill-in", typeLabel:"Fill in the Blank",
+    text:"Fill in the blank to list names of users who have listened to at least one rock song.",
+    code:`SELECT u.name FROM users u\nWHERE u.uid IN (\n  SELECT l.uid FROM listens l, songs s\n  WHERE l.sid = s.sid\n    AND ________________);`,
+    opts:["a) s.genre != 'rock'",
+          "b) s.genre = 'rock'",
+          "c) u.plan = 'rock'",
+          "d) l.uid = s.sid",
+          "e) none of the above"],
+    ans:1,
+    expl:"<span class='etag'>Subquery filter</span> The subquery joins listens and songs and needs to filter to rock genre songs. That filter belongs on the songs table: s.genre = 'rock'."
+  },
+  {
+    type:"fill-in", typeLabel:"Fill in the Blank",
+    text:"Fill in the blank to list names and countries of artists who have performed at least one song released after 2015.",
+    code:`SELECT a.name, a.country\nFROM artists a, performs p, songs s\nWHERE a.aid = p.aid\n  AND ________________\n  AND s.release_year > 2015;`,
+    opts:["a) p.aid = s.sid",
+          "b) p.sid = s.sid",
+          "c) a.aid = s.sid",
+          "d) p.aid = a.country",
+          "e) none of the above"],
+    ans:1,
+    expl:"<span class='etag'>JOIN condition</span> The missing condition connects performs to songs using their shared attribute: p.sid = s.sid."
+  },
+  {
+    type:"fill-in", typeLabel:"Fill in the Blank",
+    text:"Fill in the blank to list names of users who have never given any song a rating below 2.",
+    code:`SELECT u.name FROM users u\nWHERE ________________ (\n  SELECT * FROM listens l\n  WHERE l.uid = u.uid AND l.rating < 2);`,
+    opts:["a) EXISTS",
+          "b) NOT EXISTS",
+          "c) u.uid IN",
+          "d) u.uid NOT IN",
+          "e) none of the above"],
+    ans:1,
+    expl:"<span class='etag'>NOT EXISTS</span> The subquery is correlated (l.uid = u.uid), so NOT EXISTS is the right operator. It returns users for whom no below-2 rating row exists in listens."
+  },
+  {
+    type:"fill-in", typeLabel:"Fill in the Blank",
+    text:"Fill in X and Y to list each country's total number of users, showing only countries with more than 1000 users.",
+    code:`SELECT u.country, COUNT(*)\nFROM users u\nGROUP BY u.country\n___X___  ___Y___;`,
+    opts:["a) X: HAVING   Y: COUNT(*) > 1000",
+          "b) X: WHERE   Y: COUNT(*) > 1000",
+          "c) X: HAVING   Y: u.country > 1000",
+          "d) X: ORDER BY   Y: COUNT(*) > 1000",
+          "e) none of the above"],
+    ans:0,
+    expl:"<span class='etag'>HAVING</span> Filtering on COUNT(*) requires HAVING after GROUP BY. WHERE cannot reference aggregates. HAVING COUNT(*) > 1000 filters groups — countries — with more than 1000 users."
+  },
+  {
+    type:"fill-in", typeLabel:"Fill in the Blank",
+    text:"Fill in the blank to list uids of users who have listened to BOTH song 55 and song 77.",
+    code:`SELECT l1.uid FROM listens l1, listens l2\nWHERE ________________\n  AND l1.sid = 55 AND l2.sid = 77;`,
+    opts:["a) l1.uid != l2.uid",
+          "b) l1.sid = l2.sid",
+          "c) l1.uid = l2.uid",
+          "d) l1.rating = l2.rating",
+          "e) none of the above"],
+    ans:2,
+    expl:"<span class='etag'>Self-join</span> Aliasing listens twice lets us require the same user (l1.uid = l2.uid) to have a listen row for song 55 and a listen row for song 77."
+  },
+  {
+    type:"fill-in", typeLabel:"Fill in the Blank",
+    text:"Fill in the blank to list titles of songs that have no artist performing them.",
+    code:`SELECT s.title FROM songs s\nWHERE s.sid ________________ (\n  SELECT p.sid FROM performs p);`,
+    opts:["a) IN",
+          "b) NOT IN",
+          "c) EXISTS",
+          "d) NOT EXISTS",
+          "e) none of the above"],
+    ans:1,
+    expl:"<span class='etag'>NOT IN</span> The subquery returns all sids that appear in performs. NOT IN keeps songs whose sid does not appear there — songs with no performing artist."
+  }
+];
+
+let cur = 0, score = 0;
+let answered = new Array(Qs.length).fill(false);
+let selected = new Array(Qs.length).fill(null);
+
+function renderQ(idx) {
+  const q = Qs[idx];
+  const pct = Math.round((idx / Qs.length) * 100);
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-label').textContent = 'Question ' + (idx+1) + ' of ' + Qs.length;
+  const done = answered.filter(Boolean).length;
+  document.getElementById('score-label').textContent = done + ' answered';
+  document.getElementById('score-num').textContent = score;
+  document.getElementById('score-den').textContent = done;
+
+  const opts = q.opts.map((o, i) => {
+    let cls = 'opt-btn', dis = '';
+    if (answered[idx]) {
+      dis = 'disabled';
+      if (i === q.ans) cls += ' correct';
+      else if (i === selected[idx] && selected[idx] !== q.ans) cls += ' wrong';
+    }
+    return '<button class="' + cls + '" ' + dis + ' onclick="pick(' + idx + ',' + i + ')">' +
+           '<span class="opt-letter">' + L[i] + ')</span>' + o + '</button>';
+  }).join('');
+
+  const exStyle = answered[idx] ? 'display:block' : 'display:none';
+  document.getElementById('q-area').innerHTML =
+    '<div class="q-card">' +
+      '<div class="q-label"><span class="type-tag">' + q.typeLabel + '</span><span class="q-num">Q' + (idx+1) + '</span></div>' +
+      '<div class="q-text">' + q.text + '</div>' +
+      (q.code ? '<div class="code-block">' + q.code + '</div>' : '') +
+      '<div class="options">' + opts + '</div>' +
+      '<div class="explanation" id="expl" style="' + exStyle + '">' + q.expl + '</div>' +
+    '</div>';
+
+  document.getElementById('btn-prev').disabled = idx === 0;
+  const nxt = document.getElementById('btn-next');
+  nxt.disabled = !answered[idx];
+  if (idx === Qs.length - 1) {
+    nxt.textContent = 'See Results →';
+    nxt.onclick = showResults;
+  } else {
+    nxt.textContent = 'Next →';
+    nxt.onclick = function(){ navigate(1); };
+  }
+}
+
+function pick(idx, choice) {
+  if (answered[idx]) return;
+  answered[idx] = true;
+  selected[idx] = choice;
+  if (choice === Qs[idx].ans) score++;
+  renderQ(idx);
+  const expl = document.getElementById('expl');
+  if (expl) expl.style.display = 'block';
+}
+
+function navigate(dir) {
+  cur = Math.max(0, Math.min(Qs.length - 1, cur + dir));
+  renderQ(cur);
+}
+
+function showResults() {
+  document.getElementById('quiz-wrap').style.display = 'none';
+  const res = document.getElementById('results-wrap');
+  res.style.display = 'block';
+  const pct = Math.round((score / Qs.length) * 100);
+  document.getElementById('res-score').textContent = score + ' / ' + Qs.length;
+  document.getElementById('res-pct').textContent = pct + '%';
+  document.getElementById('res-msg').textContent =
+    pct >= 85 ? "Strong performance — you have a solid command of these concepts." :
+    pct >= 65 ? "Good foundation. Focus on the question types flagged below." :
+    "Keep studying — pay close attention to the Focus areas below before your exam.";
+
+  const tm = {};
+  Qs.forEach((q, i) => {
+    if (!tm[q.type]) tm[q.type] = { c:0, t:0 };
+    tm[q.type].t++;
+    if (selected[i] === q.ans) tm[q.type].c++;
+  });
+  let rowsHTML = '';
+  Object.keys(tm).forEach(type => {
+    const d = tm[type];
+    const p = Math.round((d.c / d.t) * 100);
+    const barColor = p >= 80 ? '#34d399' : p >= 50 ? '#fb923c' : '#f87171';
+    const badgeCls = p >= 80 ? 'strong' : p >= 50 ? 'review' : 'focus';
+    const badgeTxt = p >= 80 ? 'Strong' : p >= 50 ? 'Review' : 'Focus Here';
+    rowsHTML +=
+      '<div class="topic-row">' +
+        '<span class="topic-name">' + TOPIC_LABELS[type] + '</span>' +
+        '<div class="topic-bar-wrap"><div class="topic-bar" style="width:' + p + '%;background:' + barColor + '"></div></div>' +
+        '<span class="topic-score-label">' + d.c + '/' + d.t + '</span>' +
+        '<span class="badge ' + badgeCls + '">' + badgeTxt + '</span>' +
+      '</div>';
+  });
+  document.getElementById('topic-rows').innerHTML = rowsHTML;
+
+  const missed = Qs.filter((q, i) => selected[i] !== q.ans);
+  const missedSec = document.getElementById('missed-section');
+  if (missed.length === 0) {
+    missedSec.innerHTML = '<h3>Questions to Review</h3><p style="color:var(--green);font-size:0.88rem;padding:8px 0;">Perfect score — nothing to review!</p>';
+  } else {
+    let mHTML = '';
+    missed.forEach(q => {
+      const qi = Qs.indexOf(q);
+      const yourAns = selected[qi] !== null ? L[selected[qi]] + ') ' + q.opts[selected[qi]] : '(not answered)';
+      const rightAns = L[q.ans] + ') ' + q.opts[q.ans];
+      const snippet = q.code ? '<div style="font-family:monospace;font-size:0.67rem;color:var(--muted);margin:4px 0;white-space:pre-wrap;">' + q.code.substring(0,140) + (q.code.length>140?'…':'') + '</div>' : '';
+      mHTML +=
+        '<div class="missed-item">' +
+          '<div class="missed-q-ref">Q' + (qi+1) + ' &mdash; ' + q.typeLabel + '</div>' +
+          '<div style="font-size:0.8rem;margin-bottom:3px;">' + q.text + '</div>' +
+          snippet +
+          '<div class="missed-wrong">&#10007; You chose: ' + yourAns + '</div>' +
+          '<div class="missed-right">&#10003; Correct: ' + rightAns + '</div>' +
+          '<div class="missed-expl">' + q.expl.replace(/<[^>]+>/g,'') + '</div>' +
+        '</div>';
+    });
+    document.getElementById('missed-list').innerHTML = mHTML;
+    missedSec.querySelector('h3').textContent = 'Questions to Review (' + missed.length + ')';
+  }
+}
+
+function restartQuiz() {
+  cur = 0; score = 0;
+  answered = new Array(Qs.length).fill(false);
+  selected = new Array(Qs.length).fill(null);
+  document.getElementById('results-wrap').style.display = 'none';
+  document.getElementById('quiz-wrap').style.display = 'block';
+  renderQ(0);
+}
+
+renderQ(0);
+</script>
+</body>
+</html>
