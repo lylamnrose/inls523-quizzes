@@ -1,5 +1,22 @@
 # INLS 523 Practice Quiz Series
 
+## A quick note on how this was made
+
+This project was built with heavy AI assistance — I want to be upfront about that. 
+I'm a student with a basic foundation in HTML/CSS, and I used AI (primarily Claude) 
+as my co-builder to bring an idea to life that I wouldn't have been able to execute 
+on my own yet.
+
+My contributions included:
+- The original concept and product vision
+- Directing and prompting the AI through the build process
+- Writing a small amount of custom code (navigation tweaks)
+- Making design and UX decisions throughout
+- Testing, iterating, and deploying the final result
+
+I'm sharing this because I think there's real value in knowing how to work with AI 
+effectively — and because transparency matters to me.
+
 This project is a set of interactive practice quizzes built to reinforce core database concepts (SQL queries, schema reasoning, aggregation, and relational design).
 
 ## What this is
