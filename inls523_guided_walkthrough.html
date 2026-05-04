@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>INLS 523 — Guided Walkthrough Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f8f6f1;
+    --surface: #ffffff;
+    --surface2: #f2efe8;
+    --border: #ddd8cc;
+    --accent: #1a1a2e;
+    --accent2: #2d6a4f;
+    --highlight: #e8a020;
+    --red: #c0392b;
+    --green: #2d6a4f;
+    --blue: #1a5276;
+    --text: #1a1a1a;
+    --muted: #7a7570;
+    --code-bg: #1e2430;
+    --code-text: #a8c8d8;
+    --step-inactive: #e8e4dc;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'IBM Plex Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 24px 20px 60px; }
+  .container { max-width: 820px; margin: auto; }
+
+  header { margin-bottom: 22px; padding-bottom: 14px; border-bottom: 2px solid var(--accent); }
+  .header-top { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
+  header h1 { font-family: 'Syne', sans-serif; font-size: 1.55rem; font-weight: 800; color: var(--accent); }
+  .pill { font-size: 0.67rem; font-weight: 700; padding: 2px 9px; border-radius: 20px; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.04em; text-transform: uppercase; }
+  .pill-dark { background: var(--accent); color: white; }
+  .pill-green { background: var(--accent2); color: white; }
+  header p { font-size: 0.8rem; color: var(--muted); font-weight: 300; }
+
+  /* How it works box */
+  .how-it-works { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--highlight); border-radius: 8px; padding: 14px 18px; margin-bottom: 22px; }
+  .how-it-works h3 { font-size: 0.72rem; font-family: 'IBM Plex Mono', monospace; text-transform: uppercase; letter-spacing: 0.1em; color: var(--highlight); margin-bottom: 8px; }
+  .how-it-works ol { padding-left: 18px; font-size: 0.83rem; color: var(--muted); font-weight: 300; line-height: 1.8; }
+  .how-it-works ol li span { color: var(--text); font-weight: 500; }
+
+  .schema-box { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px; margin-bottom: 20px; }
+  .schema-box h3 { font-family: 'IBM Plex Mono', monospace; font-size: 0.67rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 10px; }
+  .schema-tables { display: flex; flex-wrap: wrap; gap: 9px; }
+  .table-card { border: 1.5px solid var(--accent); border-radius: 5px; overflow: hidden; min-width: 110px; flex: 1; }
+  .table-header { background: var(--accent); color: white; padding: 4px 10px; font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 0.71rem; }
+  .table-row { padding: 3px 10px; font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; color: var(--muted); border-top: 1px solid var(--border); }
+  .pk { text-decoration: underline; color: var(--accent); font-weight: 600; }
+  .fk { color: var(--accent2); }
+
+  .progress-wrap { margin-bottom: 16px; }
+  .progress-bar { width: 100%; height: 4px; background: var(--border); margin-bottom: 6px; }
+  .progress-fill { height: 100%; background: var(--accent); transition: width 0.4s ease; }
+  .progress-meta { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--muted); font-family: 'IBM Plex Mono', monospace; }
+
+  /* Question card */
+  .q-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 14px; animation: fadeUp 0.2s ease; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:none; } }
+
+  .q-header { padding: 14px 18px 0; }
+  .q-label { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+  .type-tag { font-family: 'IBM Plex Mono', monospace; font-size: 0.63rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); border: 1.5px solid var(--accent); padding: 1px 7px; border-radius: 3px; }
+  .q-num { font-family: 'IBM Plex Mono', monospace; font-size: 0.67rem; color: var(--muted); }
+  .q-text { font-size: 0.91rem; line-height: 1.65; margin-bottom: 12px; font-weight: 400; padding: 0 18px; }
+  .code-block { background: var(--code-bg); margin: 0 18px 16px; border-radius: 6px; padding: 12px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 0.73rem; color: var(--code-text); white-space: pre; overflow-x: auto; line-height: 1.7; }
+  /* syntax highlighting */
+  .kw { color: #7eb8f7; font-weight: 600; }
+  .tbl { color: #98d98e; }
+  .col { color: #ffd580; }
+  .str { color: #f0a070; }
+  .cmt { color: #556070; font-style: italic; }
+  .hl-pid { color: #ff9966; font-weight: 700; text-decoration: underline; }
+  .hl-did { color: #66ccff; font-weight: 700; text-decoration: underline; }
+  .hl-both { color: #cc99ff; font-weight: 700; text-decoration: underline; }
+
+  /* Step system */
+  .steps-container { border-top: 1px solid var(--border); }
+  .step { border-bottom: 1px solid var(--border); }
+  .step:last-child { border-bottom: none; }
+  .step-header { display: flex; align-items: center; gap: 10px; padding: 12px 18px; background: var(--surface2); }
+  .step-num { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; font-weight: 600; flex-shrink: 0; }
+  .step-num.inactive { background: var(--step-inactive); color: var(--muted); }
+  .step-num.active { background: var(--accent); color: white; }
+  .step-num.done { background: var(--green); color: white; }
+  .step-num.done::after { content: "✓"; }
+  .step-title { font-size: 0.83rem; font-weight: 500; color: var(--muted); }
+  .step-title.active { color: var(--text); font-weight: 700; }
+  .step-body { padding: 14px 18px; display: none; }
+  .step-body.visible { display: block; }
+  .step-prompt { font-size: 0.86rem; line-height: 1.65; margin-bottom: 12px; color: var(--text); font-weight: 300; }
+  .step-prompt strong { font-weight: 700; color: var(--accent); }
+
+  /* Step mini-options */
+  .step-opts { display: flex; flex-direction: column; gap: 6px; }
+  .step-opt { text-align: left; padding: 9px 13px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface2); color: var(--text); cursor: pointer; font-size: 0.83rem; font-family: 'IBM Plex Sans', sans-serif; font-weight: 300; line-height: 1.5; transition: border-color 0.12s, background 0.12s; }
+  .step-opt:hover:not([disabled]) { border-color: var(--accent); background: #f0eee8; }
+  .step-opt.correct { background: #eafaf1; border-color: var(--green); color: #1a5c38; }
+  .step-opt.wrong { background: #fdedec; border-color: var(--red); color: #7b241c; }
+  .step-letter { font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; color: var(--muted); margin-right: 6px; }
+  .step-opt.correct .step-letter { color: var(--green); }
+  .step-opt.wrong .step-letter { color: var(--red); }
+
+  /* Step feedback */
+  .step-feedback { margin-top: 10px; padding: 10px 13px; border-radius: 5px; font-size: 0.81rem; line-height: 1.6; font-weight: 300; display: none; }
+  .step-feedback.correct-fb { background: #eafaf1; border: 1px solid var(--green); color: #1a5c38; }
+  .step-feedback.wrong-fb { background: #fdedec; border: 1px solid var(--red); color: #7b241c; }
+  .step-feedback.info-fb { background: #eaf4fd; border: 1px solid var(--blue); color: #1a3c5c; }
+  .continue-btn { margin-top: 10px; padding: 7px 18px; background: var(--accent); color: white; border: none; border-radius: 5px; cursor: pointer; font-family: 'IBM Plex Sans', sans-serif; font-size: 0.82rem; font-weight: 500; display: none; }
+  .continue-btn:hover { background: #2a2a4e; }
+
+  /* Final answer section */
+  .final-answer-section { padding: 16px 18px; border-top: 2px solid var(--accent); background: #f8f5ee; display: none; }
+  .final-answer-section h4 { font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 12px; }
+  .final-opts { display: flex; flex-direction: column; gap: 6px; }
+  .final-opt { text-align: left; padding: 10px 14px; border: 1px solid var(--border); border-radius: 7px; background: white; color: var(--text); cursor: pointer; font-size: 0.84rem; font-family: 'IBM Plex Sans', sans-serif; font-weight: 300; line-height: 1.5; transition: border-color 0.12s, background 0.12s; }
+  .final-opt:hover:not([disabled]) { border-color: var(--accent); background: #f0eee8; }
+  .final-opt.correct { background: #eafaf1; border-color: var(--green); color: #1a5c38; font-weight: 500; }
+  .final-opt.wrong { background: #fdedec; border-color: var(--red); color: #7b241c; }
+  .final-letter { font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; color: var(--muted); margin-right: 8px; }
+  .final-opt.correct .final-letter { color: var(--green); }
+  .final-opt.wrong .final-letter { color: var(--red); }
+  .final-explanation { margin-top: 12px; padding: 11px 14px; background: #fff8e8; border-left: 3px solid var(--highlight); border-radius: 0 5px 5px 0; font-size: 0.8rem; color: #5a4010; line-height: 1.65; font-weight: 300; display: none; }
+
+  .nav { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+  .nav-btn { padding: 9px 22px; border: 1.5px solid var(--accent); background: transparent; color: var(--accent); border-radius: 6px; cursor: pointer; font-family: 'IBM Plex Sans', sans-serif; font-size: 0.83rem; font-weight: 700; transition: all 0.12s; }
+  .nav-btn:hover:not([disabled]) { background: var(--accent); color: white; }
+  .nav-btn:disabled { border-color: var(--border); color: var(--muted); cursor: default; }
+  .score-pill { font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; color: var(--muted); }
+  .score-pill span { color: var(--text); font-weight: 700; }
+
+  /* Results */
+  .results { display: none; }
+  .results-hero { background: var(--surface); border: 1.5px solid var(--accent); border-radius: 10px; padding: 32px 24px; text-align: center; margin-bottom: 18px; }
+  .results-hero h2 { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--accent); }
+  .score-display { font-family: 'IBM Plex Mono', monospace; font-size: 4rem; font-weight: 600; color: var(--accent); line-height: 1; margin: 18px 0 6px; }
+  .score-pct { font-family: 'IBM Plex Mono', monospace; font-size: 0.88rem; color: var(--muted); margin-bottom: 10px; }
+  .res-msg { font-size: 0.88rem; color: var(--muted); max-width: 460px; margin: 0 auto; line-height: 1.6; }
+  .summary-section { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 18px 22px; margin-bottom: 14px; }
+  .summary-section h3 { font-family: 'IBM Plex Mono', monospace; font-size: 0.67rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 14px; }
+  .topic-row { display: flex; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); gap: 10px; }
+  .topic-row:last-child { border-bottom: none; }
+  .topic-name { font-size: 0.82rem; flex: 1.2; font-weight: 300; }
+  .topic-bar-wrap { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .topic-bar { height: 100%; border-radius: 2px; transition: width 0.7s ease; }
+  .topic-score-label { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: var(--muted); min-width: 36px; text-align: right; }
+  .badge { font-family: 'IBM Plex Mono', monospace; font-size: 0.61rem; padding: 2px 8px; border-radius: 3px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; min-width: 74px; text-align: center; }
+  .badge.strong { background: #eafaf1; color: var(--green); border: 1px solid var(--green); }
+  .badge.review { background: #fef5e7; color: #d35400; border: 1px solid #d35400; }
+  .badge.focus { background: #fdedec; color: var(--red); border: 1px solid var(--red); }
+  .missed-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; margin-bottom: 8px; font-size: 0.8rem; line-height: 1.6; }
+  .missed-q-ref { font-family: 'IBM Plex Mono', monospace; font-size: 0.67rem; color: var(--accent2); margin-bottom: 4px; }
+  .missed-wrong { color: var(--red); margin-bottom: 2px; font-size: 0.78rem; }
+  .missed-right { color: var(--green); margin-bottom: 5px; font-size: 0.78rem; }
+  .missed-expl { color: var(--muted); font-weight: 300; font-size: 0.76rem; }
+  .restart-btn { display: block; margin: 20px auto 0; padding: 10px 32px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-family: 'IBM Plex Sans', sans-serif; font-size: 0.88rem; font-weight: 700; transition: background 0.12s; }
+  .restart-btn:hover { background: #2a2a4e; }
+</style>
+</head>
+<body>
+  <div style="display:flex; gap:15px; justify-content:center; margin-bottom:20px;">
+    <a href="index.html">Quiz 1</a>
+    <a href="inls523_practice_quiz2.html">Quiz 2</a>
+    <a href="inls523_practice_quiz3.html">Quiz 3</a>
+    <a href="inls523_practice_quiz4.html">Quiz 4</a>
+    <a href="inls523_targeted_review.html">Targeted Review</a>
+    <a href="inls523_guided_walkthrough.html">Guided Walkthrough</a>
+  </div>
+<div class="container">
+  <header>
+    <div class="header-top">
+      <h1>INLS 523 — Guided Walkthrough</h1>
+      <span class="pill pill-dark">12 questions</span>
+      <span class="pill pill-green">Step-by-step</span>
+    </div>
+    <p>Food delivery database &bull; Answer guiding questions first, then pick the final answer &bull; Focused on Subject &amp; Scope and Self-Join</p>
+  </header>
+
+  <div class="how-it-works">
+    <h3>How this quiz works</h3>
+    <ol>
+      <li><span>Read the query.</span> Don't look at the answer choices yet.</li>
+      <li><span>Answer the guiding questions.</span> Each one isolates one step of the reasoning.</li>
+      <li><span>Only then</span> the final answer choices unlock — and you'll already know the answer.</li>
+    </ol>
+  </div>
+
+  <div class="schema-box">
+    <h3>Relational Schema — Food Delivery Database</h3>
+    <div class="schema-tables">
+      <div class="table-card">
+        <div class="table-header">customers</div>
+        <div class="table-row"><span class="pk">cid</span></div>
+        <div class="table-row">name</div>
+        <div class="table-row">city</div>
+        <div class="table-row">age</div>
+        <div class="table-row">membership</div>
+      </div>
+      <div class="table-card">
+        <div class="table-header">restaurants</div>
+        <div class="table-row"><span class="pk">rid</span></div>
+        <div class="table-row">name</div>
+        <div class="table-row">cuisine</div>
+        <div class="table-row">city</div>
+        <div class="table-row">rating</div>
+      </div>
+      <div class="table-card">
+        <div class="table-header">orders</div>
+        <div class="table-row"><span class="pk fk">cid</span> &rarr; customers</div>
+        <div class="table-row"><span class="pk fk">rid</span> &rarr; restaurants</div>
+        <div class="table-row">order_year</div>
+        <div class="table-row">total</div>
+      </div>
+      <div class="table-card">
+        <div class="table-header">reviews</div>
+        <div class="table-row"><span class="pk fk">cid</span> &rarr; customers</div>
+        <div class="table-row"><span class="pk fk">rid</span> &rarr; restaurants</div>
+        <div class="table-row">score</div>
+        <div class="table-row">review_year</div>
+      </div>
+      <div class="table-card">
+        <div class="table-header">drivers</div>
+        <div class="table-row"><span class="pk">did</span></div>
+        <div class="table-row">name</div>
+        <div class="table-row">city</div>
+        <div class="table-row">vehicle</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="quiz-wrap">
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+      <div class="progress-meta">
+        <span id="prog-label">Question 1 of 12</span>
+        <span id="score-label">0 answered</span>
+      </div>
+    </div>
+    <div id="q-area"></div>
+    <div class="nav">
+      <button class="nav-btn" id="btn-prev" onclick="navigate(-1)" disabled>&larr; Prev</button>
+      <div class="score-pill">Score: <span id="score-num">0</span> / <span id="score-den">0</span></div>
+      <button class="nav-btn" id="btn-next" disabled>Next &rarr;</button>
+    </div>
+  </div>
+
+  <div class="results" id="results-wrap">
+    <div class="results-hero">
+      <h2>Guided Quiz Complete</h2>
+      <div class="score-display" id="res-score"></div>
+      <div class="score-pct" id="res-pct"></div>
+      <div class="res-msg" id="res-msg"></div>
+    </div>
+    <div class="summary-section">
+      <h3>Performance by Question Type</h3>
+      <div id="topic-rows"></div>
+    </div>
+    <div class="summary-section" id="missed-section">
+      <h3>Questions to Review</h3>
+      <div id="missed-list"></div>
+    </div>
+    <button class="restart-btn" onclick="restartQuiz()">Retake Quiz</button>
+  </div>
+</div>
+
+<script>
+const L = ['a','b','c','d','e'];
+const TOPIC_LABELS = {
+  "subject-shift": "Subject & Scope (correlated EXISTS)",
+  "self-join":     "Self-Join Pattern",
+  "notin-notex":   "NOT IN vs NOT EXISTS",
+  "aggregate":     "Aggregation"
+};
+
+// Each question has:
+//   type, typeLabel, text, code (html with highlights), steps[], opts[], ans, expl
+const Qs = [
+
+  // ── Q1: Basic scope — whose id? ──────────────────────────────────
+  {
+    type:"subject-shift", typeLabel:"Subject & Scope",
+    text:"What does the following query return?",
+    code:`<span class='kw'>SELECT</span> c.name <span class='kw'>FROM</span> customers c, orders o\n<span class='kw'>WHERE</span> c.cid = o.cid <span class='kw'>AND NOT EXISTS</span> (\n  <span class='kw'>SELECT</span> * <span class='kw'>FROM</span> reviews r\n  <span class='kw'>WHERE</span> r.<span class='hl-pid'>cid</span> = o.<span class='hl-pid'>cid</span>);`,
+    steps:[
+      {
+        title:"Step 1: What does the outer query give you?",
+        prompt:"The FROM and first WHERE clause give you a combination of two things. Which two?",
+        opts:["A customer and a restaurant they ordered from.","A customer and an order they placed.","A restaurant and a review.","A driver and a customer."],
+        ans:1,
+        correct_fb:"Exactly right. The outer query pairs each customer with each order they placed.",
+        wrong_fb:"Look at the FROM clause: it lists customers and orders. The WHERE s.cid = o.cid joins them together."
+      },
+      {
+        title:"Step 2: What id appears inside the NOT EXISTS subquery?",
+        prompt:"Look inside the subquery. Whose id is being used in the WHERE clause?",
+        opts:["The restaurant's id (rid).","The driver's id (did).","The customer's id (cid).","No id — it runs independently."],
+        ans:2,
+        correct_fb:"Correct. r.cid = o.cid uses the customer's id — cid. The subquery is checking something about the customer.",
+        wrong_fb:"Look at the subquery's WHERE clause: r.cid = o.cid. The column is cid — the customer id."
+      },
+      {
+        title:"Step 3: What is the subquery asking?",
+        prompt:"Since the subquery uses the customer's cid, what is it checking?",
+        opts:["Whether this customer has any review row at all.","Whether this restaurant has any review row.","Whether the driver delivered to this customer.","Whether the order was placed in a specific year."],
+        ans:0,
+        correct_fb:"Right. The subquery asks: does this customer (cid) appear anywhere in reviews?",
+        wrong_fb:"The subquery is FROM reviews WHERE r.cid = o.cid. It's looking up the customer's id in the reviews table."
+      },
+      {
+        title:"Step 4: Apply NOT EXISTS",
+        prompt:"NOT EXISTS is true when the subquery finds zero rows. So the full query returns customers where...",
+        opts:["...the subquery found at least one review (they have written reviews).","...the subquery found zero reviews (they have never written any review).","...the restaurant has no reviews.","...the order total is zero."],
+        ans:1,
+        correct_fb:"Perfect. NOT EXISTS fires when there are no reviews for this customer — meaning they've never reviewed anything.",
+        wrong_fb:"NOT EXISTS = subquery returns nothing. If the subquery checks for this customer's reviews, NOT EXISTS means no reviews found = never reviewed."
+      }
+    ],
+    opts:["Names of customers who have ordered from a restaurant that has no reviews.",
+          "Names of customers who have never written any review.",
+          "Names of customers who ordered from a restaurant but didn't review that specific restaurant.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:1,
+    expl:"The subquery checks r.cid = o.cid — the customer's id. NOT EXISTS fires when no review row exists for this customer. The restaurant's rid does not appear in the subquery at all, so the condition is purely about whether the customer has ever reviewed anything."
+  },
+
+  // ── Q2: Scope flip — rid instead of cid ─────────────────────────
+  {
+    type:"subject-shift", typeLabel:"Subject & Scope",
+    text:"Compare this carefully to Q1. One thing has changed. What does this query return?",
+    code:`<span class='kw'>SELECT</span> c.name <span class='kw'>FROM</span> customers c, orders o\n<span class='kw'>WHERE</span> c.cid = o.cid <span class='kw'>AND NOT EXISTS</span> (\n  <span class='kw'>SELECT</span> * <span class='kw'>FROM</span> reviews r\n  <span class='kw'>WHERE</span> r.<span class='hl-did'>rid</span> = o.<span class='hl-did'>rid</span>);`,
+    steps:[
+      {
+        title:"Step 1: What changed from Q1?",
+        prompt:"Q1 used r.cid = o.cid inside the subquery. What does this query use instead?",
+        opts:["r.did = o.did — the driver's id.","r.rid = o.rid — the restaurant's id.","r.cid = o.cid — still the customer's id.","Nothing changed."],
+        ans:1,
+        correct_fb:"Exactly. One letter changed: cid became rid. Now it's the restaurant's id inside the subquery.",
+        wrong_fb:"Look carefully at the subquery WHERE clause. The column names are r.rid and o.rid — that's the restaurant id."
+      },
+      {
+        title:"Step 2: So what is the subquery now checking?",
+        prompt:"Since the subquery uses rid, what question is it asking?",
+        opts:["Does this customer have any reviews?","Does this restaurant have any reviews (from anyone)?","Does this driver have any deliveries?","Does this order have a high total?"],
+        ans:1,
+        correct_fb:"Right. r.rid = o.rid checks whether the restaurant from this order has any reviews — from anyone at all.",
+        wrong_fb:"The subquery is FROM reviews WHERE r.rid = o.rid. It's checking the restaurant's id in the reviews table."
+      },
+      {
+        title:"Step 3: Apply NOT EXISTS",
+        prompt:"NOT EXISTS fires when the subquery finds nothing. The subquery is about the restaurant. So the result is customers who...",
+        opts:["...have ordered from a restaurant that has no reviews from anyone.","...have never ordered from any restaurant.","...have never written a review themselves.","...ordered from a restaurant they personally didn't review."],
+        ans:0,
+        correct_fb:"Correct. The customer's own reviewing history is irrelevant here — the condition is entirely about the restaurant.",
+        wrong_fb:"The subquery has no c.cid anywhere inside it. The customer is not referenced inside the subquery at all. The condition is about the restaurant, not the customer."
+      }
+    ],
+    opts:["Names of customers who have never written any review.",
+          "Names of customers who have ordered from a restaurant that has no reviews.",
+          "Names of customers who ordered from a restaurant they personally never reviewed.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:1,
+    expl:"One letter changed from Q1: cid became rid. That single change shifts the subquery from checking the customer's review history to checking the restaurant's. The customer's own cid appears nowhere inside the subquery."
+  },
+
+  // ── Q3: Both ids ─────────────────────────────────────────────────
+  {
+    type:"subject-shift", typeLabel:"Subject & Scope",
+    text:"Now both ids appear in the subquery. What does this query return?",
+    code:`<span class='kw'>SELECT</span> c.name <span class='kw'>FROM</span> customers c, orders o\n<span class='kw'>WHERE</span> c.cid = o.cid <span class='kw'>AND NOT EXISTS</span> (\n  <span class='kw'>SELECT</span> * <span class='kw'>FROM</span> reviews r\n  <span class='kw'>WHERE</span> r.<span class='hl-pid'>cid</span> = o.<span class='hl-pid'>cid</span>\n    <span class='kw'>AND</span> r.<span class='hl-did'>rid</span> = o.<span class='hl-did'>rid</span>);`,
+    steps:[
+      {
+        title:"Step 1: How many ids are in the subquery this time?",
+        prompt:"Count the conditions in the subquery WHERE clause.",
+        opts:["One — just the customer id (cid).","One — just the restaurant id (rid).","Two — both cid and rid.","None — the subquery has no WHERE clause."],
+        ans:2,
+        correct_fb:"Correct. Both r.cid = o.cid AND r.rid = o.rid appear — both the customer and the restaurant are referenced.",
+        wrong_fb:"Look at the subquery WHERE clause: r.cid = o.cid AND r.rid = o.rid. That's two conditions — one for the customer, one for the restaurant."
+      },
+      {
+        title:"Step 2: What exact combination is the subquery checking for?",
+        prompt:"With both ids present, the subquery is looking for...",
+        opts:["Any review of this restaurant from any customer.","Any review from this customer for any restaurant.","A review from this specific customer for this specific restaurant.","Any review written in a specific year."],
+        ans:2,
+        correct_fb:"Exactly. Both conditions must be true: the cid must match AND the rid must match. It's looking for a review from this customer for this restaurant.",
+        wrong_fb:"When two conditions are ANDed together, both must be true at once. cid must match AND rid must match — that means this customer reviewing this specific restaurant."
+      },
+      {
+        title:"Step 3: Apply NOT EXISTS",
+        prompt:"NOT EXISTS fires when that specific combination doesn't exist. So the result is...",
+        opts:["Customers who have ordered from a restaurant that has no reviews at all.",
+              "Customers who have never written any review.",
+              "Customers who ordered from a restaurant but have not reviewed that specific restaurant.",
+              "Customers who reviewed a restaurant they never ordered from."],
+        ans:2,
+        correct_fb:"Perfect. NOT EXISTS means no review exists for this customer + this restaurant combination. They ordered but didn't review that specific place.",
+        wrong_fb:"The subquery checks cid AND rid together. NOT EXISTS means this customer has no review row for this specific restaurant — not that they've never reviewed anything."
+      }
+    ],
+    opts:["Names of customers who have never written any review.",
+          "Names of customers who have ordered from a restaurant that has no reviews.",
+          "Names of customers who have ordered from a restaurant but have not reviewed that specific restaurant.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:2,
+    expl:"With both cid and rid in the subquery, it checks for a specific (customer, restaurant) review pair. NOT EXISTS fires when that exact combination is missing — meaning the customer ordered but didn't review that restaurant. This is the third version of the pattern: cid only, rid only, or both. Each gives a completely different answer."
+  },
+
+  // ── Q4: Nested IN inside EXISTS ──────────────────────────────────
+  {
+    type:"subject-shift", typeLabel:"Subject & Scope",
+    text:"What does the following query return?",
+    code:`<span class='kw'>SELECT</span> c.name <span class='kw'>FROM</span> customers c, orders o\n<span class='kw'>WHERE</span> c.cid = o.cid <span class='kw'>AND NOT EXISTS</span> (\n  <span class='kw'>SELECT</span> * <span class='kw'>FROM</span> reviews r\n  <span class='kw'>WHERE</span> r.rid = o.rid\n    <span class='kw'>AND</span> r.cid <span class='kw'>IN</span> (\n      <span class='kw'>SELECT</span> c2.cid <span class='kw'>FROM</span> customers c2\n      <span class='kw'>WHERE</span> c2.city = c.city));`,
+    steps:[
+      {
+        title:"Step 1: What does the innermost subquery return?",
+        prompt:"Look at the SELECT c2.cid FROM customers c2 WHERE c2.city = c.city part. What does this produce?",
+        opts:["All customer ids in the database.","Customer ids of customers from the same city as this customer.","Restaurant ids in the same city.","A single customer id."],
+        ans:1,
+        correct_fb:"Right. c2.city = c.city filters to customers who share this customer's city. It returns a list of cids from the same city.",
+        wrong_fb:"The innermost subquery is FROM customers c2 WHERE c2.city = c.city. The c.city connects back to the outer customer — it's filtering for customers in the same city."
+      },
+      {
+        title:"Step 2: What is the full subquery checking?",
+        prompt:"The subquery checks r.rid = o.rid AND r.cid IN (same-city customers). In plain English, it's asking: does this restaurant have a review written by...",
+        opts:["...this specific customer.","...any customer from the same city as this customer.","...any customer anywhere.","...a customer with a premium membership."],
+        ans:1,
+        correct_fb:"Exactly. r.cid IN (same-city cids) checks if any same-city customer reviewed this restaurant.",
+        wrong_fb:"r.cid IN (subquery) — the subquery returns same-city customer ids. So the condition is: is the review author one of the same-city customers?"
+      },
+      {
+        title:"Step 3: Apply NOT EXISTS to get the final answer",
+        prompt:"NOT EXISTS fires when no such review exists. So the query returns customers who ordered from a restaurant that has...",
+        opts:["...no reviews from anyone at all.","...no reviews from customers in the same city as this customer.","...no reviews from this specific customer.","...reviews only from other cities."],
+        ans:1,
+        correct_fb:"Correct. NOT EXISTS means the restaurant has no reviews from same-city customers. The city connection is the key bridge between the outer customer and the subquery.",
+        wrong_fb:"The subquery checks reviews where r.cid is in the list of same-city cids. NOT EXISTS means none of those same-city customers has reviewed this restaurant."
+      }
+    ],
+    opts:["Names of customers who have ordered from a restaurant with no reviews at all.",
+          "Names of customers who have ordered from a restaurant not reviewed by any customer from the same city.",
+          "Names of customers who have never reviewed any restaurant.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:1,
+    expl:"The innermost subquery collects cids of customers from the same city. The middle subquery checks whether the restaurant has been reviewed by any of those same-city customers. NOT EXISTS fires when no such review exists. The customer's city is the connecting thread that links the outer query into the subquery."
+  },
+
+  // ── Q5: EXISTS positive ──────────────────────────────────────────
+  {
+    type:"subject-shift", typeLabel:"Subject & Scope",
+    text:"What does the following query return?",
+    code:`<span class='kw'>SELECT</span> r.name <span class='kw'>FROM</span> restaurants r\n<span class='kw'>WHERE EXISTS</span> (\n  <span class='kw'>SELECT</span> * <span class='kw'>FROM</span> orders o\n  <span class='kw'>WHERE</span> o.rid = r.rid\n    <span class='kw'>AND</span> o.order_year = 2024);`,
+    steps:[
+      {
+        title:"Step 1: What id is inside the subquery?",
+        prompt:"Look at the subquery WHERE clause. Whose id appears?",
+        opts:["The customer's id (cid).","The restaurant's id (rid).","The driver's id (did).","No id — it runs independently."],
+        ans:1,
+        correct_fb:"Right. o.rid = r.rid — the restaurant's id is in the subquery.",
+        wrong_fb:"The subquery WHERE clause is o.rid = r.rid AND o.order_year = 2024. The rid connects back to the outer restaurants table."
+      },
+      {
+        title:"Step 2: What is EXISTS (not NOT EXISTS) asking?",
+        prompt:"EXISTS returns true when the subquery finds at least one row. Remember: EXISTS does NOT mean 'every' or 'all'. So this query returns restaurants where...",
+        opts:["...every order was placed in 2024.","...at least one order was placed in 2024.","...no orders were placed in 2024.","...all customers ordered in 2024."],
+        ans:1,
+        correct_fb:"Exactly. EXISTS = at least one match. Even one 2024 order is enough for this restaurant to appear.",
+        wrong_fb:"EXISTS only asks: did the subquery find anything at all? It does not require every row to match. One match is sufficient."
+      }
+    ],
+    opts:["Names of restaurants that received orders only in 2024.",
+          "Names of restaurants that received at least one order in 2024.",
+          "Names of restaurants that received no orders in 2024.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:1,
+    expl:"EXISTS returns true when at least one row is found — nothing more. The subquery checks for orders from this restaurant in 2024. EXISTS means at least one such order exists. It does not mean all orders were in 2024."
+  },
+
+  // ── Q6: NOT IN vs NOT EXISTS (non-correlated) ────────────────────
+  {
+    type:"notin-notex", typeLabel:"NOT IN vs NOT EXISTS",
+    text:"Which operator correctly fills the blank? Read the subquery carefully.",
+    code:`<span class='kw'>SELECT</span> c.name <span class='kw'>FROM</span> customers c\n<span class='kw'>WHERE</span> c.cid ________ (\n  <span class='kw'>SELECT</span> o.cid <span class='kw'>FROM</span> orders o);`,
+    steps:[
+      {
+        title:"Step 1: Does the subquery reference the outer query?",
+        prompt:"Look at the subquery: SELECT o.cid FROM orders o. Does it mention anything from the outer customers table?",
+        opts:["Yes — it references c.cid or c.name from the outer query.","No — it runs completely independently and just returns a list of cids."],
+        ans:1,
+        correct_fb:"Correct. The subquery only uses o.cid from orders. It has no reference back to the outer customers row. It runs once and produces a flat list.",
+        wrong_fb:"Check the subquery again: SELECT o.cid FROM orders o — there is no 'c.' anything inside it. It is completely independent."
+      },
+      {
+        title:"Step 2: Independent subquery = which operator?",
+        prompt:"When a subquery runs independently and produces a flat list, which operator do you use to check membership?",
+        opts:["NOT EXISTS — because it checks for zero rows.","NOT IN — because it compares a value against a list.","EXISTS — because it checks if rows exist.","Either works in all cases."],
+        ans:1,
+        correct_fb:"Right. NOT IN compares c.cid against the list produced by the subquery. NOT EXISTS needs a correlated subquery that references the outer row — it can't be used with a flat list like this.",
+        wrong_fb:"NOT EXISTS requires the subquery to reference the outer row (e.g. WHERE o.cid = c.cid). When the subquery is independent and returns a list, NOT IN is the correct operator."
+      }
+    ],
+    opts:["a) NOT EXISTS",
+          "b) NOT IN",
+          "c) Either works identically here.",
+          "d) EXISTS",
+          "e) None of the above"],
+    ans:1,
+    expl:"The subquery SELECT o.cid FROM orders o runs independently — no reference to the outer customers row. It produces a flat list of cids. NOT IN compares c.cid against that list. NOT EXISTS requires a correlated subquery with a reference back to the outer row, like WHERE o.cid = c.cid."
+  },
+
+  // ── Q7: NOT IN vs NOT EXISTS (correlated) ────────────────────────
+  {
+    type:"notin-notex", typeLabel:"NOT IN vs NOT EXISTS",
+    text:"Now which operator fills the blank?",
+    code:`<span class='kw'>SELECT</span> c.name <span class='kw'>FROM</span> customers c\n<span class='kw'>WHERE</span> ________ (\n  <span class='kw'>SELECT</span> * <span class='kw'>FROM</span> orders o\n  <span class='kw'>WHERE</span> o.cid = c.cid);`,
+    steps:[
+      {
+        title:"Step 1: Does the subquery reference the outer query?",
+        prompt:"Look at the subquery WHERE clause: o.cid = c.cid. Where does c.cid come from?",
+        opts:["From the orders table — it's internal to the subquery.","From the outer customers table — it's a reference back to the outer row.","It's a constant value.","It's undefined — this is an error."],
+        ans:1,
+        correct_fb:"Correct. c.cid is from the outer customers table. The subquery runs once per customer row, plugging in that customer's cid each time. This is a correlated subquery.",
+        wrong_fb:"c.cid uses the alias 'c' which is defined in the outer query FROM customers c. The subquery is using the outer row's value — that's what makes it correlated."
+      },
+      {
+        title:"Step 2: Correlated subquery = which operator?",
+        prompt:"The subquery uses SELECT * and references the outer row. Which operator fits this structure?",
+        opts:["NOT IN — because it compares a value against a list.","NOT EXISTS — because the subquery is correlated and checks for row existence."],
+        ans:1,
+        correct_fb:"Right. NOT EXISTS is designed for correlated subqueries. It runs the subquery once per outer row and asks: did it return any rows? SELECT * fits perfectly because we don't need the values — just whether rows exist.",
+        wrong_fb:"NOT IN needs to compare a value against a list: c.cid NOT IN (SELECT o.cid ...). But this subquery uses SELECT * and references the outer row — that structure is designed for NOT EXISTS."
+      }
+    ],
+    opts:["a) c.cid NOT IN",
+          "b) NOT EXISTS",
+          "c) c.cid IN",
+          "d) EXISTS",
+          "e) None of the above"],
+    ans:1,
+    expl:"The subquery uses SELECT * and references c.cid from the outer query — it is correlated. NOT EXISTS is the correct operator for correlated subqueries. It runs once per customer, checks if any order row exists for that customer, and returns true when none do."
+  },
+
+  // ── Q8: Self-join — WHY = and not != ─────────────────────────────
+  {
+    type:"self-join", typeLabel:"Self-Join Pattern",
+    text:"Fill in the blank to find cids of customers who have ordered from BOTH restaurant 5 and restaurant 9.",
+    code:`<span class='kw'>SELECT</span> o1.cid <span class='kw'>FROM</span> orders o1, orders o2\n<span class='kw'>WHERE</span> ________\n  <span class='kw'>AND</span> o1.rid = 5 <span class='kw'>AND</span> o2.rid = 9;`,
+    steps:[
+      {
+        title:"Step 1: Why does orders appear twice?",
+        prompt:"The FROM clause lists orders twice (as o1 and o2). What is the point of this?",
+        opts:["To double the number of rows in the result.",
+              "So we can check two different conditions on two different rows of the same table at once.",
+              "Because you always need two aliases for joins.",
+              "It's a mistake — you only need orders once."],
+        ans:1,
+        correct_fb:"Exactly. We need to check that the same customer has a row where rid=5 AND a separate row where rid=9. One alias can't satisfy both at once, so we use two.",
+        wrong_fb:"We need a single customer to have ordered from restaurant 5 (one row) AND restaurant 9 (a different row). Two aliases let us check both rows at the same time."
+      },
+      {
+        title:"Step 2: What should the blank condition do?",
+        prompt:"o1 checks restaurant 5. o2 checks restaurant 9. We want the SAME customer in both. The blank condition should...",
+        opts:["Make sure o1.cid and o2.cid are DIFFERENT customers (use !=).",
+              "Make sure o1.cid and o2.cid are the SAME customer (use =)."],
+        ans:1,
+        correct_fb:"Right. We want the same customer to appear in both o1 and o2. = is what ties the two aliases to the same person.",
+        wrong_fb:"Think about what the query needs to find: one customer who ordered from both restaurants. For that to work, the customer id in o1 must be the SAME as the customer id in o2. Use =, not !=."
+      },
+      {
+        title:"Step 3: What would o1.cid != o2.cid actually return?",
+        prompt:"If you used != instead, the query would return...",
+        opts:["The same result — = and != are interchangeable here.",
+              "Customer ids where one customer ordered from restaurant 5 and a completely different customer ordered from restaurant 9.",
+              "An error.",
+              "No results at all."],
+        ans:1,
+        correct_fb:"Correct. != means the two aliases represent different people. You'd get customer A (ordered from 5) paired with customer B (ordered from 9) — meaningless noise. You wanted customer A to have ordered from both.",
+        wrong_fb:"!= means the two cids must be different — two different people. So you'd get pairs of different customers, not one customer who ordered from both restaurants."
+      }
+    ],
+    opts:["a) o1.cid != o2.cid",
+          "b) o1.rid = o2.rid",
+          "c) o1.cid = o2.cid",
+          "d) o1.rid != o2.rid",
+          "e) none of the above"],
+    ans:2,
+    expl:"The self-join aliases the same table twice so you can require the same customer to appear in two different rows. o1.cid = o2.cid ensures both aliases point to the same customer. Using != would pair up different customers — the exact opposite of what you want."
+  },
+
+  // ── Q9: Self-join — applying the pattern ─────────────────────────
+  {
+    type:"self-join", typeLabel:"Self-Join Pattern",
+    text:"Fill in the blank to find cids of customers who have given a score of 5 to BOTH restaurant 3 and restaurant 7.",
+    code:`<span class='kw'>SELECT</span> r1.cid <span class='kw'>FROM</span> reviews r1, reviews r2\n<span class='kw'>WHERE</span> ________\n  <span class='kw'>AND</span> r1.rid = 3 <span class='kw'>AND</span> r2.rid = 7\n  <span class='kw'>AND</span> r1.score = 5 <span class='kw'>AND</span> r2.score = 5;`,
+    steps:[
+      {
+        title:"Step 1: Same pattern — which join condition do you need?",
+        prompt:"This is the same self-join pattern as Q8 but on reviews instead of orders. The blank should ensure...",
+        opts:["r1.cid != r2.cid — different customers in each alias.",
+              "r1.cid = r2.cid — the same customer in both aliases.",
+              "r1.rid = r2.rid — the same restaurant in both aliases.",
+              "r1.score = r2.score — matching scores (already handled)."],
+        ans:1,
+        correct_fb:"Correct. Same rule: = ties both aliases to the same customer. r1 and r2 must refer to the same person.",
+        wrong_fb:"You need the same customer to appear in both r1 (score 5 for restaurant 3) and r2 (score 5 for restaurant 7). = on the customer id is what connects them."
+      }
+    ],
+    opts:["a) r1.cid != r2.cid",
+          "b) r1.rid = r2.rid",
+          "c) r1.cid = r2.cid",
+          "d) r1.score != r2.score",
+          "e) none of the above"],
+    ans:2,
+    expl:"Same self-join pattern. r1.cid = r2.cid ensures both aliases refer to the same customer — one who gave a 5 to restaurant 3 and a 5 to restaurant 7."
+  },
+
+  // ── Q10: Aggregation — WHERE vs HAVING ───────────────────────────
+  {
+    type:"aggregate", typeLabel:"Aggregation",
+    text:"Which query correctly returns each city's average customer age, only for cities where that average is above 35?",
+    code:null,
+    steps:[
+      {
+        title:"Step 1: Where does the filter AVG(age) > 35 belong?",
+        prompt:"You want to filter based on a computed average. Is AVG(age) > 35 a row-level filter or a group-level filter?",
+        opts:["Row-level — it filters individual customer rows, so it goes in WHERE.",
+              "Group-level — it filters groups after computing the average, so it goes in HAVING."],
+        ans:1,
+        correct_fb:"Right. You can't know the average until all rows in the group have been processed. HAVING filters groups after aggregation.",
+        wrong_fb:"WHERE filters individual rows before grouping. You can't use an aggregate like AVG() in WHERE because the average doesn't exist yet at that point. It goes in HAVING."
+      },
+      {
+        title:"Step 2: What is the correct clause order?",
+        prompt:"SQL requires a specific order. Which is correct?",
+        opts:["SELECT → FROM → HAVING → GROUP BY → WHERE",
+              "SELECT → FROM → WHERE → HAVING → GROUP BY",
+              "SELECT → FROM → WHERE → GROUP BY → HAVING",
+              "SELECT → FROM → GROUP BY → WHERE → HAVING"],
+        ans:2,
+        correct_fb:"Correct. WHERE (row filter) → GROUP BY (group) → HAVING (group filter). Always in that order.",
+        wrong_fb:"The required order is: WHERE filters rows first, then GROUP BY creates groups, then HAVING filters the groups. So: WHERE → GROUP BY → HAVING."
+      }
+    ],
+    opts:["SELECT city, AVG(age) FROM customers WHERE AVG(age) > 35 GROUP BY city;",
+          "SELECT city, AVG(age) FROM customers GROUP BY city HAVING AVG(age) > 35;",
+          "SELECT city, AVG(age) FROM customers GROUP BY city HAVING age > 35;",
+          "SELECT city, AVG(age) FROM customers HAVING AVG(age) > 35 GROUP BY city;"],
+    ans:1,
+    expl:"AVG(age) > 35 is a group-level filter — it goes in HAVING, after GROUP BY. Option a) illegally puts an aggregate in WHERE. Option c) uses a non-aggregate column in HAVING. Option d) has HAVING before GROUP BY which violates required clause order."
+  },
+
+  // ── Q11: Aggregation — 'both correct' trap ───────────────────────
+  {
+    type:"aggregate", typeLabel:"Aggregation",
+    text:"Which query correctly counts the total number of orders per restaurant?",
+    code:null,
+    steps:[
+      {
+        title:"Step 1: What does COUNT(*) vs COUNT(cid) count?",
+        prompt:"orders has a primary key of (cid, rid) — neither column can ever be NULL. Given this, what is the difference between COUNT(*) and COUNT(cid) on this table?",
+        opts:["COUNT(*) counts all rows; COUNT(cid) skips rows where cid is NULL — so they could differ.",
+              "COUNT(*) counts all rows; COUNT(cid) also counts all rows because cid is part of the PK and can never be NULL — so they always produce the same number.",
+              "COUNT(cid) counts distinct customers; COUNT(*) counts all rows.",
+              "They always differ by 1."],
+        ans:1,
+        correct_fb:"Exactly. When the column being counted can never be NULL (like a PK column), COUNT(col) and COUNT(*) always return the same number.",
+        wrong_fb:"COUNT(col) skips NULLs. But cid is part of the primary key of orders — PKs can never be NULL. So COUNT(cid) never skips anything and equals COUNT(*)."
+      },
+      {
+        title:"Step 2: Which answer option should you pick?",
+        prompt:"If two options produce the same result, what is the correct answer choice?",
+        opts:["Pick whichever option comes first.",
+              "Look for a 'both a and b' option — that is the correct answer.",
+              "Neither is correct if they look different.",
+              "Flip a coin."],
+        ans:1,
+        correct_fb:"Right. When you spot two equivalent options, the answer is almost always the 'both' choice. This is a deliberate trap the exam uses.",
+        wrong_fb:"On these exams, when two options produce identical results, there is usually a 'both X and Y' answer choice. That is always the correct one to pick."
+      }
+    ],
+    opts:["SELECT rid, COUNT(*) FROM orders GROUP BY rid;",
+          "SELECT rid, COUNT(cid) FROM orders GROUP BY rid;",
+          "SELECT rid, COUNT(*) FROM orders WHERE rid > 0 GROUP BY rid;",
+          "Both a) and b) produce the same result.",
+          "All three produce the same result."],
+    ans:3,
+    expl:"COUNT(*) and COUNT(cid) both produce the same result because cid is part of the primary key and can never be NULL. Option c) adds WHERE rid > 0 which could theoretically filter out restaurants with rid <= 0 — a different result. So a) and b) are equivalent but c) is not."
+  },
+
+  // ── Q12: Aggregation — COUNT DISTINCT ────────────────────────────
+  {
+    type:"aggregate", typeLabel:"Aggregation",
+    text:"What does the following query return?",
+    code:`<span class='kw'>SELECT</span> r.cuisine, <span class='kw'>COUNT</span>(<span class='kw'>DISTINCT</span> o.cid)\n<span class='kw'>FROM</span> restaurants r, orders o\n<span class='kw'>WHERE</span> r.rid = o.rid\n<span class='kw'>GROUP BY</span> r.cuisine\n<span class='kw'>HAVING COUNT</span>(<span class='kw'>DISTINCT</span> o.cid) >= 50;`,
+    steps:[
+      {
+        title:"Step 1: Is COUNT(DISTINCT col) valid SQL?",
+        prompt:"You may have seen this before and been unsure. COUNT(DISTINCT col) is...",
+        opts:["Invalid — COUNT cannot take DISTINCT as an argument.",
+              "Valid — it counts the number of unique (non-duplicate) values in that column.",
+              "Valid — but only in Oracle, not standard SQL.",
+              "Valid — but it always returns 1."],
+        ans:1,
+        correct_fb:"Correct. COUNT(DISTINCT col) is standard SQL and counts unique values. COUNT(DISTINCT o.cid) counts unique customer ids — so each customer is counted once even if they ordered many times.",
+        wrong_fb:"COUNT(DISTINCT col) is completely standard SQL. It counts the number of distinct values — duplicates are ignored. COUNT(DISTINCT o.cid) counts unique customers."
+      },
+      {
+        title:"Step 2: What does this query compute and filter?",
+        prompt:"The query groups by cuisine and uses COUNT(DISTINCT o.cid). What does HAVING COUNT(DISTINCT o.cid) >= 50 filter to?",
+        opts:["Cuisines with at least 50 total order rows.",
+              "Cuisines with at least 50 distinct customers who have ordered.",
+              "Cuisines where each restaurant has 50 customers.",
+              "Cuisines with restaurants rated 50 or above."],
+        ans:1,
+        correct_fb:"Exactly. Grouping by cuisine and counting distinct cids gives the number of unique customers who have ordered from that cuisine type. HAVING >= 50 keeps cuisines with at least 50 such customers.",
+        wrong_fb:"COUNT(DISTINCT o.cid) counts unique customers — not order rows. A customer who placed 10 orders still counts as 1. So HAVING >= 50 means at least 50 different customers ordered from that cuisine."
+      }
+    ],
+    opts:["Cuisines that have at least 50 total orders.",
+          "Cuisines where at least 50 distinct customers have placed an order.",
+          "Cuisines where every restaurant has at least 50 customers.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:1,
+    expl:"COUNT(DISTINCT o.cid) is valid SQL that counts unique customers. Grouping by cuisine computes this per cuisine type. HAVING >= 50 filters to cuisines with at least 50 distinct customers — not 50 order rows."
+  }
+];
+
+// ── State ────────────────────────────────────────────────────────────
+let cur = 0, score = 0;
+let qState = Qs.map(() => ({
+  stepsAnswered: 0,
+  stepsCorrect: [],
+  finalAnswered: false,
+  finalSelected: null
+}));
+
+function renderQ(idx) {
+  const q = Qs[idx];
+  const st = qState[idx];
+  const pct = Math.round((idx / Qs.length) * 100);
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-label').textContent = 'Question ' + (idx+1) + ' of ' + Qs.length;
+  const done = qState.filter(s => s.finalAnswered).length;
+  document.getElementById('score-label').textContent = done + ' answered';
+  document.getElementById('score-num').textContent = score;
+  document.getElementById('score-den').textContent = done;
+
+  // Build steps HTML
+  let stepsHTML = '';
+  q.steps.forEach((step, si) => {
+    const isActive = si === st.stepsAnswered && !st.finalAnswered;
+    const isDone = si < st.stepsAnswered || st.finalAnswered;
+    const numCls = isDone ? 'done' : (isActive ? 'active' : 'inactive');
+    const titleCls = isActive ? 'active' : '';
+
+    let bodyHTML = '';
+    if (isActive || isDone) {
+      const stepOpts = step.opts.map((o, oi) => {
+        let cls = 'step-opt';
+        let dis = '';
+        if (isDone || si < st.stepsAnswered) {
+          dis = 'disabled';
+          if (oi === step.ans) cls += ' correct';
+          else if (st.stepsCorrect[si] === false && oi === st['stepSelected_' + si]) cls += ' wrong';
+        }
+        return '<button class="' + cls + '" ' + dis + ' onclick="pickStep(' + idx + ',' + si + ',' + oi + ')">' +
+               '<span class="step-letter">' + L[oi] + ')</span>' + o + '</button>';
+      }).join('');
+
+      const fbCorrect = st['stepFb_' + si] === 'correct';
+      const fbWrong = st['stepFb_' + si] === 'wrong';
+      const fbStyle = (fbCorrect || fbWrong) ? 'display:block' : 'display:none';
+      const fbCls = fbCorrect ? 'correct-fb' : 'wrong-fb';
+      const fbText = fbCorrect ? step.correct_fb : (fbWrong ? step.wrong_fb : '');
+      const contStyle = (fbCorrect || fbWrong) && si === st.stepsAnswered - 1 && !st.finalAnswered && si === q.steps.length - 1 ? 'display:none' :
+                        (fbCorrect || fbWrong) && si < st.stepsAnswered ? 'display:none' :
+                        (fbCorrect || fbWrong) ? 'display:inline-block' : 'display:none';
+
+      bodyHTML =
+        '<div class="step-prompt">' + step.prompt + '</div>' +
+        '<div class="step-opts">' + stepOpts + '</div>' +
+        '<div class="step-feedback ' + fbCls + '" id="sfb-' + idx + '-' + si + '" style="' + fbStyle + '">' + fbText + '</div>' +
+        '<button class="continue-btn" id="scont-' + idx + '-' + si + '" onclick="continueSteps(' + idx + ',' + si + ')" style="' + contStyle + '">Continue &rarr;</button>';
+    }
+
+    stepsHTML +=
+      '<div class="step">' +
+        '<div class="step-header">' +
+          '<div class="step-num ' + numCls + '">' + (isDone ? '' : (si + 1)) + '</div>' +
+          '<div class="step-title ' + titleCls + '">' + step.title + '</div>' +
+        '</div>' +
+        (isActive || isDone ? '<div class="step-body visible">' + bodyHTML + '</div>' : '<div class="step-body"></div>') +
+      '</div>';
+  });
+
+  // Final answer section
+  const finalStyle = (st.stepsAnswered >= q.steps.length || st.finalAnswered) ? 'display:block' : 'display:none';
+  const finalOpts = q.opts.map((o, oi) => {
+    let cls = 'final-opt', dis = '';
+    if (st.finalAnswered) {
+      dis = 'disabled';
+      if (oi === q.ans) cls += ' correct';
+      else if (oi === st.finalSelected && st.finalSelected !== q.ans) cls += ' wrong';
+    }
+    return '<button class="' + cls + '" ' + dis + ' onclick="pickFinal(' + idx + ',' + oi + ')">' +
+           '<span class="final-letter">' + L[oi] + ')</span>' + o + '</button>';
+  }).join('');
+
+  const explStyle = st.finalAnswered ? 'display:block' : 'display:none';
+
+  document.getElementById('q-area').innerHTML =
+    '<div class="q-card">' +
+      '<div class="q-header">' +
+        '<div class="q-label">' +
+          '<span class="type-tag">' + q.typeLabel + '</span>' +
+          '<span class="q-num">Q' + (idx+1) + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="q-text">' + q.text + '</div>' +
+      (q.code ? '<div class="code-block">' + q.code + '</div>' : '') +
+      '<div class="steps-container">' + stepsHTML + '</div>' +
+      '<div class="final-answer-section" id="final-section-' + idx + '" style="' + finalStyle + '">' +
+        '<h4>Now choose the final answer</h4>' +
+        '<div class="final-opts">' + finalOpts + '</div>' +
+        '<div class="final-explanation" id="final-expl-' + idx + '" style="' + explStyle + '">' + q.expl + '</div>' +
+      '</div>' +
+    '</div>';
+
+  document.getElementById('btn-prev').disabled = idx === 0;
+  const nxt = document.getElementById('btn-next');
+  nxt.disabled = !qState[idx].finalAnswered;
+  if (idx === Qs.length - 1) {
+    nxt.textContent = 'See Results →';
+    nxt.onclick = showResults;
+  } else {
+    nxt.textContent = 'Next →';
+    nxt.onclick = function(){ navigate(1); };
+  }
+}
+
+function pickStep(qIdx, stepIdx, choice) {
+  const st = qState[qIdx];
+  const step = Qs[qIdx].steps[stepIdx];
+  if (st['stepFb_' + stepIdx] !== undefined) return; // already answered
+
+  st['stepSelected_' + stepIdx] = choice;
+  const correct = choice === step.ans;
+  st['stepFb_' + stepIdx] = correct ? 'correct' : 'wrong';
+  if (correct) {
+    st.stepsCorrect[stepIdx] = true;
+    st.stepsAnswered = stepIdx + 1;
+    // If last step, show final answer section
+    if (stepIdx === Qs[qIdx].steps.length - 1) {
+      renderQ(qIdx);
+    } else {
+      renderQ(qIdx);
+    }
+  } else {
+    st.stepsCorrect[stepIdx] = false;
+    renderQ(qIdx);
+  }
+}
+
+function continueSteps(qIdx, stepIdx) {
+  const st = qState[qIdx];
+  // Force move to next step even if wrong (after showing feedback)
+  st.stepsAnswered = stepIdx + 1;
+  if (stepIdx === Qs[qIdx].steps.length - 1) {
+    // Open final answer
+  }
+  renderQ(qIdx);
+}
+
+function pickFinal(qIdx, choice) {
+  const st = qState[qIdx];
+  if (st.finalAnswered) return;
+  st.finalAnswered = true;
+  st.finalSelected = choice;
+  if (choice === Qs[qIdx].ans) score++;
+  renderQ(qIdx);
+  const expl = document.getElementById('final-expl-' + qIdx);
+  if (expl) expl.style.display = 'block';
+  document.getElementById('btn-next').disabled = false;
+}
+
+function navigate(dir) {
+  cur = Math.max(0, Math.min(Qs.length - 1, cur + dir));
+  renderQ(cur);
+}
+
+function showResults() {
+  document.getElementById('quiz-wrap').style.display = 'none';
+  const res = document.getElementById('results-wrap');
+  res.style.display = 'block';
+  const pct = Math.round((score / Qs.length) * 100);
+  document.getElementById('res-score').textContent = score + ' / ' + Qs.length;
+  document.getElementById('res-pct').textContent = pct + '%';
+  document.getElementById('res-msg').textContent =
+    pct >= 90 ? "The guided approach is working. You're ready for the exam." :
+    pct >= 70 ? "Good progress. Redo any questions you missed and trace through the steps again." :
+    "Retake this quiz — work through every step carefully without skipping ahead.";
+
+  const tm = {};
+  Qs.forEach((q, i) => {
+    if (!tm[q.type]) tm[q.type] = { c:0, t:0 };
+    tm[q.type].t++;
+    if (qState[i].finalSelected === q.ans) tm[q.type].c++;
+  });
+  let rowsHTML = '';
+  Object.keys(tm).forEach(type => {
+    const d = tm[type];
+    const p = Math.round((d.c / d.t) * 100);
+    const barColor = p >= 80 ? '#2d6a4f' : p >= 60 ? '#d35400' : '#c0392b';
+    const badgeCls = p >= 80 ? 'strong' : p >= 60 ? 'review' : 'focus';
+    const badgeTxt = p >= 80 ? 'Strong' : p >= 60 ? 'Review' : 'Focus Here';
+    rowsHTML +=
+      '<div class="topic-row">' +
+        '<span class="topic-name">' + TOPIC_LABELS[type] + '</span>' +
+        '<div class="topic-bar-wrap"><div class="topic-bar" style="width:' + p + '%;background:' + barColor + '"></div></div>' +
+        '<span class="topic-score-label">' + d.c + '/' + d.t + '</span>' +
+        '<span class="badge ' + badgeCls + '">' + badgeTxt + '</span>' +
+      '</div>';
+  });
+  document.getElementById('topic-rows').innerHTML = rowsHTML;
+
+  const missed = Qs.filter((q, i) => qState[i].finalSelected !== q.ans);
+  const missedSec = document.getElementById('missed-section');
+  if (missed.length === 0) {
+    missedSec.innerHTML = '<h3>Questions to Review</h3><p style="color:#2d6a4f;font-size:0.88rem;padding:8px 0;">Perfect score — every concept is solid!</p>';
+  } else {
+    let mHTML = '';
+    missed.forEach(q => {
+      const qi = Qs.indexOf(q);
+      const fs = qState[qi].finalSelected;
+      const yourAns = fs !== null ? L[fs] + ') ' + q.opts[fs] : '(not answered)';
+      const rightAns = L[q.ans] + ') ' + q.opts[q.ans];
+      mHTML +=
+        '<div class="missed-item">' +
+          '<div class="missed-q-ref">Q' + (qi+1) + ' &mdash; ' + q.typeLabel + '</div>' +
+          '<div style="font-size:0.8rem;margin-bottom:3px;">' + q.text + '</div>' +
+          '<div class="missed-wrong">&#10007; You chose: ' + yourAns + '</div>' +
+          '<div class="missed-right">&#10003; Correct: ' + rightAns + '</div>' +
+          '<div class="missed-expl">' + q.expl + '</div>' +
+        '</div>';
+    });
+    document.getElementById('missed-list').innerHTML = mHTML;
+    missedSec.querySelector('h3').textContent = 'Questions to Review (' + missed.length + ')';
+  }
+}
+
+function restartQuiz() {
+  cur = 0; score = 0;
+  qState = Qs.map(() => ({ stepsAnswered: 0, stepsCorrect: [], finalAnswered: false, finalSelected: null }));
+  document.getElementById('results-wrap').style.display = 'none';
+  document.getElementById('quiz-wrap').style.display = 'block';
+  renderQ(0);
+}
+
+renderQ(0);
+</script>
+</body>
+</html>
