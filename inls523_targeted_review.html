@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>INLS 523 — Targeted Review Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0c0c0a;
+    --surface: #131310;
+    --surface2: #1a1a16;
+    --border: #2a2a22;
+    --accent: #f0c040;
+    --accent2: #60c0a0;
+    --red: #f87171;
+    --orange: #fb923c;
+    --green: #34d399;
+    --text: #f0ede8;
+    --muted: #70706a;
+    --code-bg: #0a0a08;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'IBM Plex Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 28px 20px 60px; }
+  .container { max-width: 860px; margin: auto; }
+
+  header { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+  .header-top { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+  header h1 { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800; color: var(--accent); }
+  .pill { background: var(--accent); color: #0c0c0a; font-size: 0.67rem; font-weight: 700; padding: 2px 9px; border-radius: 20px; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.04em; text-transform: uppercase; }
+  .pill.focus { background: var(--red); color: white; }
+  header p { font-size: 0.8rem; color: var(--muted); font-weight: 300; line-height: 1.6; }
+
+  /* Focus areas banner */
+  .focus-banner { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 8px; padding: 14px 18px; margin-bottom: 22px; }
+  .focus-banner h3 { font-family: 'IBM Plex Mono', monospace; font-size: 0.67rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 10px; }
+  .focus-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .focus-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 5px; padding: 6px 12px; font-size: 0.78rem; color: var(--text); font-weight: 300; }
+  .focus-item .pct { font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; margin-left: 6px; }
+  .focus-item .pct.bad { color: var(--red); }
+  .focus-item .pct.ok { color: var(--orange); }
+
+  .schema-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; margin-bottom: 22px; }
+  .schema-box h3 { font-family: 'IBM Plex Mono', monospace; font-size: 0.67rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 12px; }
+  .schema-tables { display: flex; flex-wrap: wrap; gap: 10px; }
+  .table-card { border: 1px solid var(--border); border-radius: 6px; overflow: hidden; min-width: 110px; flex: 1; }
+  .table-header { background: var(--surface2); border-bottom: 1px solid var(--accent); color: var(--accent); padding: 4px 10px; font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 0.72rem; }
+  .table-row { padding: 3px 10px; font-family: 'IBM Plex Mono', monospace; font-size: 0.69rem; color: var(--muted); border-top: 1px solid var(--border); }
+  .pk { text-decoration: underline; color: var(--accent); font-weight: 600; }
+  .fk { color: var(--accent2); }
+
+  /* Section dividers */
+  .section-header { display: flex; align-items: center; gap: 12px; margin: 20px 0 12px; }
+  .section-label { font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); }
+  .section-line { flex: 1; height: 1px; background: var(--border); }
+  .section-count { font-family: 'IBM Plex Mono', monospace; font-size: 0.67rem; color: var(--muted); }
+
+  .progress-wrap { margin-bottom: 18px; }
+  .progress-bar { width: 100%; height: 3px; background: var(--border); margin-bottom: 7px; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 0.4s ease; }
+  .progress-meta { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--muted); font-family: 'IBM Plex Mono', monospace; }
+
+  .q-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 14px; animation: fadeUp 0.2s ease; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:none; } }
+  .q-label { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .type-tag { font-family: 'IBM Plex Mono', monospace; font-size: 0.64rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); border: 1px solid var(--accent); padding: 1px 7px; border-radius: 3px; }
+  .q-num { font-family: 'IBM Plex Mono', monospace; font-size: 0.67rem; color: var(--muted); }
+  .why-hard { font-family: 'IBM Plex Mono', monospace; font-size: 0.62rem; color: var(--orange); background: #1e1008; border: 1px solid #3a2010; padding: 1px 7px; border-radius: 3px; }
+  .q-text { font-size: 0.91rem; line-height: 1.65; margin-bottom: 12px; font-weight: 300; }
+
+  .code-block { background: var(--code-bg); border: 1px solid var(--border); border-left: 3px solid var(--accent2); border-radius: 0 6px 6px 0; padding: 12px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: #a8c0b8; white-space: pre; overflow-x: auto; margin-bottom: 14px; line-height: 1.7; }
+
+  .options { display: flex; flex-direction: column; gap: 6px; }
+  .opt-btn { text-align: left; padding: 10px 14px; border: 1px solid var(--border); border-radius: 7px; background: var(--surface2); color: var(--text); cursor: pointer; font-size: 0.83rem; font-family: 'IBM Plex Sans', sans-serif; font-weight: 300; line-height: 1.5; transition: border-color 0.12s, background 0.12s; }
+  .opt-btn:hover:not([disabled]) { border-color: var(--accent); background: #1e1c10; }
+  .opt-btn.correct { background: #0d2018; border-color: var(--green); color: #86efca; }
+  .opt-btn.wrong { background: #200d0d; border-color: var(--red); color: #fca5a5; }
+  .opt-letter { font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; color: var(--muted); margin-right: 8px; }
+  .opt-btn.correct .opt-letter { color: var(--green); }
+  .opt-btn.wrong .opt-letter { color: var(--red); }
+
+  .explanation { margin-top: 12px; padding: 11px 14px; background: #160f04; border-left: 3px solid var(--orange); border-radius: 0 6px 6px 0; font-size: 0.8rem; color: #d4b896; line-height: 1.65; font-weight: 300; display: none; }
+  .etag { display: inline-block; background: #2a1800; border: 1px solid var(--orange); color: var(--orange); font-size: 0.62rem; padding: 1px 6px; border-radius: 2px; margin-right: 6px; font-family: 'IBM Plex Mono', monospace; text-transform: uppercase; letter-spacing: 0.06em; vertical-align: middle; }
+  .trap-note { display: block; margin-top: 8px; padding: 7px 10px; background: #120a0a; border: 1px solid #3a1a1a; border-radius: 4px; font-size: 0.77rem; color: #e0a0a0; }
+  .trap-note::before { content: "⚠ Common trap: "; font-weight: 600; }
+
+  .nav { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+  .nav-btn { padding: 9px 22px; border: 1px solid var(--border); background: transparent; color: var(--muted); border-radius: 6px; cursor: pointer; font-family: 'IBM Plex Sans', sans-serif; font-size: 0.83rem; font-weight: 500; transition: all 0.12s; }
+  .nav-btn:hover:not([disabled]) { border-color: var(--text); color: var(--text); }
+  .nav-btn:disabled { opacity: 0.3; cursor: default; }
+  .nav-btn.primary { border-color: var(--accent); color: var(--accent); }
+  .nav-btn.primary:hover:not([disabled]) { background: var(--accent); color: #0c0c0a; }
+  .score-pill { font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; color: var(--muted); }
+  .score-pill span { color: var(--text); }
+
+  /* Results */
+  .results { display: none; }
+  .results-hero { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 36px 28px; text-align: center; margin-bottom: 18px; }
+  .results-hero h2 { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800; color: var(--accent); margin-bottom: 4px; }
+  .score-display { font-family: 'IBM Plex Mono', monospace; font-size: 4.5rem; font-weight: 600; color: var(--text); line-height: 1; margin: 20px 0 8px; }
+  .score-pct { font-family: 'IBM Plex Mono', monospace; font-size: 0.88rem; color: var(--muted); margin-bottom: 12px; }
+  .res-msg { font-size: 0.88rem; color: var(--muted); max-width: 460px; margin: 0 auto; line-height: 1.6; font-weight: 300; }
+
+  .summary-section { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px 22px; margin-bottom: 14px; }
+  .summary-section h3 { font-family: 'IBM Plex Mono', monospace; font-size: 0.67rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 16px; }
+  .topic-row { display: flex; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--border); gap: 10px; }
+  .topic-row:last-child { border-bottom: none; }
+  .topic-name { font-size: 0.82rem; flex: 1.2; font-weight: 300; }
+  .topic-bar-wrap { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .topic-bar { height: 100%; border-radius: 2px; transition: width 0.7s ease; }
+  .topic-score-label { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: var(--muted); min-width: 36px; text-align: right; }
+  .badge { font-family: 'IBM Plex Mono', monospace; font-size: 0.61rem; padding: 2px 8px; border-radius: 3px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; min-width: 74px; text-align: center; }
+  .badge.strong { background: #0d2018; color: var(--green); border: 1px solid var(--green); }
+  .badge.review { background: #1e1008; color: var(--orange); border: 1px solid var(--orange); }
+  .badge.focus { background: #200d0d; color: var(--red); border: 1px solid var(--red); }
+
+  .missed-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 13px 15px; margin-bottom: 8px; font-size: 0.8rem; line-height: 1.6; }
+  .missed-q-ref { font-family: 'IBM Plex Mono', monospace; font-size: 0.67rem; color: var(--accent2); margin-bottom: 4px; }
+  .missed-wrong { color: var(--red); margin-bottom: 2px; font-size: 0.78rem; }
+  .missed-right { color: var(--green); margin-bottom: 5px; font-size: 0.78rem; }
+  .missed-expl { color: var(--muted); font-weight: 300; font-size: 0.76rem; }
+
+  .restart-btn { display: block; margin: 20px auto 0; padding: 10px 32px; background: transparent; border: 1px solid var(--accent); color: var(--accent); border-radius: 6px; cursor: pointer; font-family: 'IBM Plex Sans', sans-serif; font-size: 0.88rem; font-weight: 500; transition: background 0.12s, color 0.12s; }
+  .restart-btn:hover { background: var(--accent); color: #0c0c0a; }
+</style>
+</head>
+<body>
+  <div style="display:flex; gap:15px; justify-content:center; margin-bottom:20px;"></div>
+    <a href="index.html">Quiz 1</a>
+    <a href="inls523_practice_quiz2.html">Quiz 2</a>
+    <a href="inls523_practice_quiz3.html">Quiz 3</a>
+    <a href="inls523_practice_quiz4.html">Quiz 4</a>
+    <a href="inls523_targeted_review.html">Targeted Review</a>
+  </div>
+<div class="container">
+  <header>
+    <div class="header-top">
+      <h1>INLS 523 — Targeted Review</h1>
+      <span class="pill">30 questions</span>
+      <span class="pill focus">Weak areas only</span>
+    </div>
+    <p>Built from your Quiz 2, 3, and 4 results &bull; Hospital database &bull; Focused on Subject &amp; Scope, Aggregation, Cardinality, and Fill in the Blank</p>
+  </header>
+
+  <div class="focus-banner">
+    <h3>Your weak areas from previous quizzes</h3>
+    <div class="focus-grid">
+      <div class="focus-item">Subject &amp; Scope <span class="pct bad">2/4 (50%)</span></div>
+      <div class="focus-item">Aggregation <span class="pct bad">6/10 (60%)</span></div>
+      <div class="focus-item">Cardinality <span class="pct ok">5/7 (71%)</span></div>
+      <div class="focus-item">Fill in the Blank <span class="pct ok">11/16 (69%)</span></div>
+      <div class="focus-item">NOT IN vs NOT EXISTS <span class="pct bad">missed 2x</span></div>
+      <div class="focus-item">Self-join pattern <span class="pct bad">missed 2x</span></div>
+    </div>
+  </div>
+
+  <div class="schema-box">
+    <h3>Relational Schema — Hospital Database</h3>
+    <div class="schema-tables">
+      <div class="table-card">
+        <div class="table-header">patients</div>
+        <div class="table-row"><span class="pk">pid</span></div>
+        <div class="table-row">name</div>
+        <div class="table-row">age</div>
+        <div class="table-row">city</div>
+        <div class="table-row">insurance</div>
+      </div>
+      <div class="table-card">
+        <div class="table-header">doctors</div>
+        <div class="table-row"><span class="pk">did</span></div>
+        <div class="table-row">name</div>
+        <div class="table-row">dept</div>
+        <div class="table-row">rank</div>
+        <div class="table-row">years_exp</div>
+      </div>
+      <div class="table-card">
+        <div class="table-header">visits</div>
+        <div class="table-row"><span class="pk fk">pid</span> &rarr; patients</div>
+        <div class="table-row"><span class="pk fk">did</span> &rarr; doctors</div>
+        <div class="table-row">visit_year</div>
+        <div class="table-row">diagnosis</div>
+      </div>
+      <div class="table-card">
+        <div class="table-header">prescriptions</div>
+        <div class="table-row"><span class="pk fk">pid</span> &rarr; patients</div>
+        <div class="table-row"><span class="pk fk">did</span> &rarr; doctors</div>
+        <div class="table-row">drug</div>
+        <div class="table-row">year</div>
+      </div>
+      <div class="table-card">
+        <div class="table-header">departments</div>
+        <div class="table-row"><span class="pk">dept</span></div>
+        <div class="table-row">building</div>
+        <div class="table-row">num_staff</div>
+        <div class="table-row">head_did</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="quiz-wrap">
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+      <div class="progress-meta">
+        <span id="prog-label">Question 1 of 30</span>
+        <span id="score-label">0 answered</span>
+      </div>
+    </div>
+    <div id="q-area"></div>
+    <div class="nav">
+      <button class="nav-btn" id="btn-prev" onclick="navigate(-1)" disabled>&larr; Prev</button>
+      <div class="score-pill">Score: <span id="score-num">0</span> / <span id="score-den">0</span></div>
+      <button class="nav-btn primary" id="btn-next" disabled>Next &rarr;</button>
+    </div>
+  </div>
+
+  <div class="results" id="results-wrap">
+    <div class="results-hero">
+      <h2>Targeted Review Complete</h2>
+      <div class="score-display" id="res-score"></div>
+      <div class="score-pct" id="res-pct"></div>
+      <div class="res-msg" id="res-msg"></div>
+    </div>
+    <div class="summary-section">
+      <h3>Performance by Question Type</h3>
+      <div id="topic-rows"></div>
+    </div>
+    <div class="summary-section" id="missed-section">
+      <h3>Questions to Review</h3>
+      <div id="missed-list"></div>
+    </div>
+    <button class="restart-btn" onclick="restartQuiz()">Retake Quiz</button>
+  </div>
+</div>
+
+<script>
+const L = ['a','b','c','d','e'];
+const TOPIC_LABELS = {
+  "subject-shift":   "Subject & Scope (correlated EXISTS)",
+  "notin-vs-notex":  "NOT IN vs NOT EXISTS",
+  "self-join":       "Self-Join Pattern",
+  "aggregate":       "Aggregation (GROUP BY / HAVING)",
+  "cardinality":     "Cardinality",
+  "fill-in":         "Fill in the Blank (general)"
+};
+
+const Qs = [
+
+  // ══════════════════════════════════════════════════════════════════
+  // SECTION 1: SUBJECT & SCOPE  (8 questions — your biggest weakness)
+  // ══════════════════════════════════════════════════════════════════
+
+  {
+    type:"subject-shift", typeLabel:"Subject & Scope",
+    why:"No user id in subquery = condition is about the thing, not the person",
+    text:"What does the following query return?",
+    code:`SELECT p.name FROM patients p, visits v\nWHERE p.pid = v.pid AND NOT EXISTS (\n  SELECT * FROM prescriptions rx\n  WHERE rx.pid = v.pid);`,
+    opts:["Names of patients who have visited a doctor who has written no prescriptions.",
+          "Names of patients who have never received any prescription.",
+          "Names of patients who have visited a doctor but have no prescription from that visit.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:1,
+    expl:"<span class='etag'>Scope — patient id inside</span> The subquery references rx.pid = v.pid — that's the patient's id. So NOT EXISTS fires when this patient has no prescription rows at all. The condition is about the patient, not the doctor. <span class='trap-note'>You picked 'about the doctor' on similar questions before. Always check whose id is inside.</span>"
+  },
+  {
+    type:"subject-shift", typeLabel:"Subject & Scope",
+    why:"No user id in subquery = condition is about the thing, not the person",
+    text:"What does the following query return?",
+    code:`SELECT p.name FROM patients p, visits v\nWHERE p.pid = v.pid AND NOT EXISTS (\n  SELECT * FROM prescriptions rx\n  WHERE rx.did = v.did);`,
+    opts:["Names of patients who have never received a prescription.",
+          "Names of patients who have visited a doctor who has written no prescriptions to anyone.",
+          "Names of patients who have visited a doctor but didn't get a prescription from them.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:1,
+    expl:"<span class='etag'>Scope — doctor id inside</span> Now the subquery references rx.did = v.did — the doctor's id, not the patient's. NOT EXISTS fires when that doctor has written no prescriptions to anyone at all. The patient's pid is absent from the subquery entirely. <span class='trap-note'>Compare carefully to Q1: one letter difference (pid vs did) completely flips the meaning.</span>"
+  },
+  {
+    type:"subject-shift", typeLabel:"Subject & Scope",
+    why:"Both ids inside = condition connects patient TO doctor",
+    text:"What does the following query return?",
+    code:`SELECT p.name FROM patients p, visits v\nWHERE p.pid = v.pid AND NOT EXISTS (\n  SELECT * FROM prescriptions rx\n  WHERE rx.pid = v.pid\n    AND rx.did = v.did);`,
+    opts:["Names of patients who have visited a doctor who prescribed nothing to anyone.",
+          "Names of patients who have never received any prescription.",
+          "Names of patients who visited a doctor but received no prescription from that specific doctor.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:2,
+    expl:"<span class='etag'>Both ids inside</span> Now both rx.pid = v.pid AND rx.did = v.did are in the subquery. It checks for a prescription from this specific doctor to this specific patient. NOT EXISTS means that exact combination doesn't exist. <span class='trap-note'>This is the three-version pattern: pid only, did only, or both. The answer changes completely each time.</span>"
+  },
+  {
+    type:"subject-shift", typeLabel:"Subject & Scope",
+    why:"Nested IN inside EXISTS — trace the chain",
+    text:"What does the following query return?",
+    code:`SELECT p.name FROM patients p, visits v\nWHERE p.pid = v.pid AND NOT EXISTS (\n  SELECT * FROM prescriptions rx\n  WHERE rx.did = v.did\n    AND rx.pid IN (\n      SELECT p2.pid FROM patients p2\n      WHERE p2.insurance = p.insurance));`,
+    opts:["Names of patients who visited a doctor who has never prescribed to any patient with the same insurance as this patient.",
+          "Names of patients who have no insurance.",
+          "Names of patients who visited a doctor who prescribed nothing to anyone.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:0,
+    expl:"<span class='etag'>Nested IN + scope</span> The subquery checks: did this doctor (rx.did = v.did) prescribe to any patient who shares this patient's insurance (p.insurance)? NOT EXISTS means no such prescription exists. The patient's insurance is the connecting thread back to the outer query."
+  },
+  {
+    type:"subject-shift", typeLabel:"Subject & Scope",
+    why:"EXISTS positive — same logic, no negation",
+    text:"What does the following query return?",
+    code:`SELECT d.name FROM doctors d\nWHERE EXISTS (\n  SELECT * FROM visits v\n  WHERE v.did = d.did\n    AND v.visit_year = 2023);`,
+    opts:["Names of doctors who saw every patient in 2023.",
+          "Names of doctors who saw at least one patient in 2023.",
+          "Names of doctors who saw no patients in 2023.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:1,
+    expl:"<span class='etag'>EXISTS = at least one</span> EXISTS returns true when the subquery finds at least one row. It does NOT mean 'all' or 'every'. The subquery checks whether this doctor has any visit row in 2023 — even one is enough."
+  },
+  {
+    type:"subject-shift", typeLabel:"Subject & Scope",
+    why:"EXISTS does not mean ALL — this is the misconception from your last question",
+    text:"What does the following query return?",
+    code:`SELECT p.name FROM patients p\nWHERE EXISTS (\n  SELECT * FROM visits v\n  WHERE v.pid = p.pid\n    AND v.diagnosis = 'flu');`,
+    opts:["Names of patients who have only ever been diagnosed with flu.",
+          "Names of patients who have been diagnosed with flu every visit.",
+          "Names of patients who have been diagnosed with flu at least once.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:2,
+    expl:"<span class='etag'>EXISTS ≠ ALL</span> EXISTS means at least one matching row was found — nothing more. It does not mean 'every visit' or 'only flu'. A patient with one flu diagnosis among ten visits still satisfies EXISTS. <span class='trap-note'>EXISTS and NOT EXISTS are both 'at least one' operators, never 'all/every'.</span>"
+  },
+  {
+    type:"subject-shift", typeLabel:"Subject & Scope",
+    why:"Outer query gives (patient, doctor) pair — track what the subquery checks",
+    text:"What does the following query return?",
+    code:`SELECT p.name FROM patients p, visits v\nWHERE p.pid = v.pid AND EXISTS (\n  SELECT * FROM prescriptions rx\n  WHERE rx.did = v.did\n    AND rx.pid = p.pid);`,
+    opts:["Names of patients who have visited a doctor and also received a prescription from that same doctor.",
+          "Names of patients who have received any prescription from any doctor.",
+          "Names of patients who visited a doctor who has written prescriptions to other patients.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:0,
+    expl:"<span class='etag'>Both ids — positive EXISTS</span> The subquery checks rx.did = v.did (same doctor from the visit) AND rx.pid = p.pid (same patient). EXISTS fires when both match — meaning this patient got a prescription from the doctor they visited."
+  },
+  {
+    type:"subject-shift", typeLabel:"Subject & Scope",
+    why:"dept in subquery connects patient to doctor's department",
+    text:"What does the following query return?",
+    code:`SELECT p.name FROM patients p, visits v\nWHERE p.pid = v.pid AND NOT EXISTS (\n  SELECT * FROM doctors d\n  WHERE d.did = v.did\n    AND d.dept IN (\n      SELECT dept FROM departments\n      WHERE building = 'North Wing'));`,
+    opts:["Names of patients who have never visited the North Wing.",
+          "Names of patients who have visited a doctor not in the North Wing building.",
+          "Names of patients who visited a doctor whose department is not in the North Wing building.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:2,
+    expl:"<span class='etag'>Nested IN + dept filter</span> The subquery checks if the visited doctor's dept is in the North Wing. NOT EXISTS is true when no such match exists — meaning the doctor's department is not in North Wing. The patient's id doesn't appear inside, so the condition is about the doctor's location."
+  },
+
+  // ══════════════════════════════════════════════════════════════════
+  // SECTION 2: NOT IN vs NOT EXISTS  (you missed this on Q12/Q35)
+  // ══════════════════════════════════════════════════════════════════
+
+  {
+    type:"notin-vs-notex", typeLabel:"NOT IN vs NOT EXISTS",
+    why:"Non-correlated subquery = NOT IN. Correlated subquery = NOT EXISTS",
+    text:"Which operator correctly fills the blank? The subquery does NOT reference the outer query.",
+    code:`SELECT p.name FROM patients p\nWHERE p.pid ________ (\n  SELECT rx.pid FROM prescriptions rx);`,
+    opts:["a) NOT EXISTS",
+          "b) NOT IN",
+          "c) Either works — they are identical",
+          "d) EXISTS",
+          "e) none of the above"],
+    ans:1,
+    expl:"<span class='etag'>NOT IN for flat lists</span> The subquery runs independently and produces a flat list of pids. NOT IN checks whether the patient's pid appears in that list. NOT EXISTS requires a correlated subquery that references the outer row — it can't be used with a standalone list like this. <span class='trap-note'>You chose NOT EXISTS on this pattern twice. Key rule: if the subquery has no reference back to the outer query, use NOT IN.</span>"
+  },
+  {
+    type:"notin-vs-notex", typeLabel:"NOT IN vs NOT EXISTS",
+    why:"Correlated subquery = NOT EXISTS",
+    text:"Which operator correctly fills the blank? The subquery DOES reference the outer query.",
+    code:`SELECT p.name FROM patients p\nWHERE ________ (\n  SELECT * FROM prescriptions rx\n  WHERE rx.pid = p.pid);`,
+    opts:["a) p.pid NOT IN",
+          "b) NOT EXISTS",
+          "c) p.pid IN",
+          "d) EXISTS",
+          "e) none of the above"],
+    ans:1,
+    expl:"<span class='etag'>NOT EXISTS for correlated</span> The subquery references p.pid from the outer query — it's correlated. NOT EXISTS is the right operator because it runs once per outer row. NOT IN would need to compare a value against a list, which doesn't work when the subquery references the outer query like this."
+  },
+  {
+    type:"notin-vs-notex", typeLabel:"NOT IN vs NOT EXISTS",
+    why:"The deciding question: does the subquery reference the outer row?",
+    text:"Which two queries produce the same logical result?",
+    code:`-- Query A\nSELECT d.name FROM doctors d\nWHERE d.did NOT IN (\n  SELECT v.did FROM visits v);\n\n-- Query B\nSELECT d.name FROM doctors d\nWHERE NOT EXISTS (\n  SELECT * FROM visits v\n  WHERE v.did = d.did);\n\n-- Query C\nSELECT d.name FROM doctors d\nWHERE NOT EXISTS (\n  SELECT * FROM visits v);`,
+    opts:["A and B produce the same result.",
+          "A and C produce the same result.",
+          "B and C produce the same result.",
+          "All three produce the same result.",
+          "None produce the same result."],
+    ans:0,
+    expl:"<span class='etag'>NOT IN ≡ NOT EXISTS (correlated)</span> A uses NOT IN with a flat list of dids. B uses NOT EXISTS with a correlated subquery (v.did = d.did). Both return doctors who have never had a visit. C is wrong because its subquery has no reference back to d.did — it just checks whether the visits table is non-empty at all, which is a totally different question."
+  },
+  {
+    type:"notin-vs-notex", typeLabel:"NOT IN vs NOT EXISTS",
+    why:"Choosing between operators on a fill-in",
+    text:"Fill in the blank to list names of departments that have no doctors assigned to them.",
+    code:`SELECT dept FROM departments\nWHERE dept ________ (\n  SELECT d.dept FROM doctors d);`,
+    opts:["a) NOT EXISTS",
+          "b) NOT IN",
+          "c) IN",
+          "d) EXISTS",
+          "e) none of the above"],
+    ans:1,
+    expl:"<span class='etag'>NOT IN — flat list</span> The subquery produces a flat list of dept values from the doctors table. The outer query compares the dept column against this list. NOT IN is correct because there is no reference back to the outer row inside the subquery — it runs independently."
+  },
+
+  // ══════════════════════════════════════════════════════════════════
+  // SECTION 3: SELF-JOIN  (you used != instead of = both times)
+  // ══════════════════════════════════════════════════════════════════
+
+  {
+    type:"self-join", typeLabel:"Self-Join Pattern",
+    why:"= not != — you need the SAME patient to appear in both rows",
+    text:"Fill in the blank to find pids of patients who visited BOTH doctor 10 and doctor 20.",
+    code:`SELECT v1.pid FROM visits v1, visits v2\nWHERE ________\n  AND v1.did = 10 AND v2.did = 20;`,
+    opts:["a) v1.pid != v2.pid",
+          "b) v1.did = v2.did",
+          "c) v1.pid = v2.pid",
+          "d) v1.did != v2.did",
+          "e) none of the above"],
+    ans:2,
+    expl:"<span class='etag'>Self-join = same person, different rows</span> You alias visits twice (v1, v2) so you can require the same patient (v1.pid = v2.pid) to appear once with did=10 and once with did=20. Using != would find patients where the two aliases have different pids — meaning two different patients, which is the opposite of what you want. <span class='trap-note'>You chose != on this pattern twice. The self-join always uses = to require the same person across both aliases.</span>"
+  },
+  {
+    type:"self-join", typeLabel:"Self-Join Pattern",
+    why:"= connects the same entity across two aliases",
+    text:"Fill in the blank to find pids of patients who received prescriptions for BOTH 'aspirin' and 'ibuprofen'.",
+    code:`SELECT r1.pid FROM prescriptions r1, prescriptions r2\nWHERE ________\n  AND r1.drug = 'aspirin'\n  AND r2.drug = 'ibuprofen';`,
+    opts:["a) r1.pid != r2.pid",
+          "b) r1.drug = r2.drug",
+          "c) r1.pid = r2.pid",
+          "d) r1.did = r2.did",
+          "e) none of the above"],
+    ans:2,
+    expl:"<span class='etag'>Self-join</span> Same pattern: alias prescriptions twice, require the same patient (r1.pid = r2.pid) to appear in a row for aspirin and a row for ibuprofen. The = sign is what ties both aliases to the same person."
+  },
+  {
+    type:"self-join", typeLabel:"Self-Join Pattern",
+    why:"Understanding what != would actually mean",
+    text:"If you used v1.pid != v2.pid in a self-join instead of v1.pid = v2.pid, what would the query actually return?",
+    code:`SELECT v1.pid FROM visits v1, visits v2\nWHERE v1.pid != v2.pid\n  AND v1.did = 10 AND v2.did = 20;`,
+    opts:["Pids of patients who visited both doctor 10 and doctor 20.",
+          "Pids of patients who visited doctor 10 but not doctor 20.",
+          "Pids of patients who visited doctor 10, where some other different patient visited doctor 20.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:2,
+    expl:"<span class='etag'>What != actually does</span> With !=, the two aliases no longer represent the same person. v1.pid != v2.pid means patient A visited doctor 10 and patient B (a different person) visited doctor 20. So the query returns patient A's pid whenever any other patient has visited doctor 20 — completely meaningless for the intended goal."
+  },
+
+  // ══════════════════════════════════════════════════════════════════
+  // SECTION 4: AGGREGATION  (you struggled with HAVING placement,
+  // COUNT DISTINCT, and the "both correct" trap)
+  // ══════════════════════════════════════════════════════════════════
+
+  {
+    type:"aggregate", typeLabel:"Aggregation",
+    why:"WHERE vs HAVING — you chose HAVING in the wrong place on Q20",
+    text:"Which query correctly finds the average age of patients in each city, only for cities where that average is above 50?",
+    code:null,
+    opts:["SELECT city, AVG(age) FROM patients WHERE AVG(age) > 50 GROUP BY city;",
+          "SELECT city, AVG(age) FROM patients GROUP BY city HAVING AVG(age) > 50;",
+          "SELECT city, AVG(age) FROM patients GROUP BY city HAVING age > 50;",
+          "SELECT city, AVG(age) FROM patients HAVING AVG(age) > 50 GROUP BY city;"],
+    ans:1,
+    expl:"<span class='etag'>HAVING after GROUP BY</span> The correct order is always GROUP BY then HAVING. Option a) illegally puts AVG() in WHERE. Option c) uses a non-aggregate column in HAVING. Option d) has HAVING before GROUP BY — invalid syntax."
+  },
+  {
+    type:"aggregate", typeLabel:"Aggregation",
+    why:"The 'both correct' trap — you chose a single option when two were equivalent",
+    text:"Which query correctly finds the total number of visits per doctor?",
+    code:null,
+    opts:["SELECT did, COUNT(*) FROM visits GROUP BY did;",
+          "SELECT did, COUNT(pid) FROM visits GROUP BY did;",
+          "SELECT did, COUNT(*) FROM visits WHERE did > 0 GROUP BY did;",
+          "Both a) and b) produce the same result.",
+          "All three produce the same result."],
+    ans:3,
+    expl:"<span class='etag'>Both correct trap</span> COUNT(*) counts all rows. COUNT(pid) counts non-null pid values — but pid is part of the primary key and can never be null, so both return the same number. Options a) and b) are equivalent. <span class='trap-note'>When you see two options that look almost identical, check whether the difference actually changes the result before picking just one.</span>"
+  },
+  {
+    type:"aggregate", typeLabel:"Aggregation",
+    why:"COUNT DISTINCT — you said this was an error when it isn't",
+    text:"What does the following query return?",
+    code:`SELECT d.dept, COUNT(DISTINCT v.pid)\nFROM doctors d, visits v\nWHERE d.did = v.did\nGROUP BY d.dept\nHAVING COUNT(DISTINCT v.pid) >= 20;`,
+    opts:["Departments where at least 20 doctors work.",
+          "Departments where at least 20 distinct patients have been seen.",
+          "Departments where each doctor has seen at least 20 patients.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:1,
+    expl:"<span class='etag'>COUNT DISTINCT</span> COUNT(DISTINCT v.pid) counts unique patients across all doctors in each department. HAVING filters to departments with at least 20 such patients. This is valid SQL — COUNT(DISTINCT col) is a standard aggregate function, not an error. <span class='trap-note'>You chose 'error' for COUNT DISTINCT on Quiz 4. It is always valid.</span>"
+  },
+  {
+    type:"aggregate", typeLabel:"Aggregation",
+    why:"HAVING with non-aggregate column — which conditions go where",
+    text:"Which part of this query is wrong?",
+    code:`SELECT dept, MAX(years_exp)\nFROM doctors\nGROUP BY dept\nHAVING dept = 'cardiology';`,
+    opts:["Nothing is wrong — this is valid SQL that returns the max experience in cardiology.",
+          "HAVING dept = 'cardiology' is wrong — non-aggregate conditions must go in WHERE.",
+          "MAX(years_exp) cannot be used with GROUP BY.",
+          "The query would produce an error because dept is text.",
+          "None of the above"],
+    ans:0,
+    expl:"<span class='etag'>HAVING with non-aggregate</span> This is actually valid SQL. HAVING can filter on non-aggregate columns too — it's just less efficient than WHERE, which would filter before grouping. The query returns correct results. In practice you'd write WHERE dept = 'cardiology' for efficiency, but HAVING dept = 'cardiology' is not wrong."
+  },
+  {
+    type:"aggregate", typeLabel:"Aggregation",
+    why:"Tricky: WHERE filters rows, HAVING filters groups — order matters",
+    text:"What does the following query return?",
+    code:`SELECT d.dept, COUNT(*)\nFROM doctors d, visits v\nWHERE d.did = v.did\n  AND v.visit_year = 2023\nGROUP BY d.dept\nHAVING COUNT(*) > 10;`,
+    opts:["Departments where more than 10 doctors worked in 2023.",
+          "Departments where more than 10 visits happened in 2023.",
+          "Departments where each doctor had more than 10 visits in 2023.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:1,
+    expl:"<span class='etag'>WHERE + HAVING together</span> WHERE filters to 2023 visits first — before grouping. Then GROUP BY collects by department. Then HAVING COUNT(*) > 10 keeps departments with more than 10 (2023) visit rows. Result: departments with more than 10 visits in 2023."
+  },
+  {
+    type:"aggregate", typeLabel:"Aggregation",
+    why:"The 'both correct' trap again — look for WHERE conditions that change nothing",
+    text:"Which query correctly computes the maximum years of experience per department?",
+    code:null,
+    opts:["SELECT dept, MAX(years_exp) FROM doctors GROUP BY dept;",
+          "SELECT dept, MAX(years_exp) FROM doctors WHERE years_exp >= 0 GROUP BY dept;",
+          "SELECT dept, MAX(years_exp) FROM doctors GROUP BY dept HAVING MAX(years_exp) > 0;",
+          "Both a) and b) produce the same result.",
+          "All three produce the same result."],
+    ans:3,
+    expl:"<span class='etag'>Both correct trap</span> Options a) and b) produce the same result because years_exp is presumably never negative. The WHERE years_exp >= 0 in b) doesn't filter out any real rows. Option c) adds HAVING MAX(years_exp) > 0 which would exclude departments where everyone has 0 experience — a different result, so not equivalent."
+  },
+  {
+    type:"aggregate", typeLabel:"Aggregation",
+    why:"Correct use of AVG with HAVING",
+    text:"What does the following query return?",
+    code:`SELECT d.did, d.name, AVG(p.age)\nFROM doctors d, visits v, patients p\nWHERE d.did = v.did AND v.pid = p.pid\nGROUP BY d.did, d.name\nHAVING AVG(p.age) < 30;`,
+    opts:["Doctors whose patients are all under 30.",
+          "Doctors whose average patient age across all their visits is under 30.",
+          "Doctors who have seen fewer than 30 patients.",
+          "The query would produce an error.",
+          "None of the above"],
+    ans:1,
+    expl:"<span class='etag'>AVG + HAVING</span> The query joins doctors, visits, and patients, groups by doctor, and computes the average age of all patients that doctor has seen. HAVING AVG(p.age) < 30 keeps only doctors whose average patient age is under 30 — not doctors where every patient is under 30 (that would require a different approach)."
+  },
+
+  // ══════════════════════════════════════════════════════════════════
+  // SECTION 5: CARDINALITY  (you confused 1-N with N-M twice)
+  // ══════════════════════════════════════════════════════════════════
+
+  {
+    type:"cardinality", typeLabel:"Cardinality",
+    why:"Junction table = N-M. Direct table = 1-N",
+    text:"What is the cardinality between PATIENTS and DOCTORS (via visits)?",
+    code:null,
+    opts:["1-1", "1-N (one patient sees many doctors)", "N-M (many patients see many doctors)", "Cannot be determined"],
+    ans:2,
+    expl:"<span class='etag'>N-M via junction table</span> A patient can see many doctors, and a doctor can see many patients. Visits is a junction table connecting them — classic N-M. <span class='trap-note'>Whenever two real-world entities connect through a junction table (visits, enrolls, listens, borrows), the relationship between those two entities is almost always N-M.</span>"
+  },
+  {
+    type:"cardinality", typeLabel:"Cardinality",
+    why:"From a parent table to its junction table = 1-N",
+    text:"What is the cardinality between PATIENTS and VISITS (the table itself, not doctors)?",
+    code:null,
+    opts:["1-1 (one patient maps to one visit row)", "1-N (one patient can have many visit rows)", "N-M", "Cannot be determined"],
+    ans:1,
+    expl:"<span class='etag'>1-N: parent to junction</span> A single patient (one pid) can appear in many rows in visits — one per doctor seen. The relationship from patients directly to the visits table is 1-N. This is different from the N-M relationship between patients and doctors via visits."
+  },
+  {
+    type:"cardinality", typeLabel:"Cardinality",
+    why:"Distinguishing 1-N from N-M is the key cardinality skill",
+    text:"What is the cardinality between DOCTORS and DEPARTMENTS?",
+    code:null,
+    opts:["1-1 (one doctor belongs to exactly one department)", "1-N (one department has many doctors)", "N-M (doctors belong to many departments)", "Cannot be determined from the schema"],
+    ans:1,
+    expl:"<span class='etag'>1-N without junction table</span> Each doctor has a dept attribute (a single value), meaning each doctor belongs to one department. But one department can have many doctors. This is 1-N from departments to doctors. There is no junction table here — it's a direct attribute relationship."
+  },
+  {
+    type:"cardinality", typeLabel:"Cardinality",
+    why:"No junction table + single FK = 1-N",
+    text:"What is the cardinality between DOCTORS and VISITS?",
+    code:null,
+    opts:["1-1", "1-N (one doctor can have many visit rows)", "N-M", "Cannot be determined"],
+    ans:1,
+    expl:"<span class='etag'>1-N: parent to junction</span> A single doctor (one did) can appear in many rows in visits — one per patient seen. Relationship from doctors to visits is 1-N. Just like patients to visits."
+  },
+  {
+    type:"cardinality", typeLabel:"Cardinality",
+    why:"Spotting N-M — both sides can have many",
+    text:"What is the cardinality between PATIENTS and DOCTORS (via prescriptions)?",
+    code:null,
+    opts:["1-1", "1-N", "N-M (a patient can receive prescriptions from many doctors, and a doctor can prescribe to many patients)", "Cannot be determined"],
+    ans:2,
+    expl:"<span class='etag'>N-M via junction table</span> Prescriptions is a junction table: a patient can receive prescriptions from many doctors, and a doctor can write prescriptions for many patients. N-M."
+  },
+
+  // ══════════════════════════════════════════════════════════════════
+  // SECTION 6: FILL IN THE BLANK (general)
+  // ══════════════════════════════════════════════════════════════════
+
+  {
+    type:"fill-in", typeLabel:"Fill in the Blank",
+    why:"Three-table join condition — matching FK to PK",
+    text:"Fill in the blank to list names and diagnoses of patients seen in the cardiology department.",
+    code:`SELECT p.name, v.diagnosis\nFROM patients p, visits v, doctors d\nWHERE p.pid = v.pid\n  AND ________\n  AND d.dept = 'cardiology';`,
+    opts:["a) v.pid = d.did",
+          "b) v.did = d.did",
+          "c) p.pid = d.did",
+          "d) v.did = p.pid",
+          "e) none of the above"],
+    ans:1,
+    expl:"<span class='etag'>JOIN condition</span> The missing condition connects visits to doctors. The shared attribute is the doctor id: v.did = d.did."
+  },
+  {
+    type:"fill-in", typeLabel:"Fill in the Blank",
+    why:"HAVING placement with correct column",
+    text:"Fill in X and Y to list departments with more than 5 doctors ranked 'senior'.",
+    code:`SELECT d.dept, COUNT(*)\nFROM doctors d\nWHERE ___X___\nGROUP BY d.dept\n___Y___;`,
+    opts:["a) X: d.rank = 'senior'   Y: HAVING COUNT(*) > 5",
+          "b) X: COUNT(*) > 5   Y: HAVING d.rank = 'senior'",
+          "c) X: d.rank = 'senior'   Y: HAVING d.dept > 5",
+          "d) X: d.dept > 5   Y: HAVING COUNT(*) > 5",
+          "e) none of the above"],
+    ans:0,
+    expl:"<span class='etag'>WHERE vs HAVING</span> Filtering individual rows (rank = 'senior') belongs in WHERE — before grouping. Filtering groups (count > 5) belongs in HAVING — after grouping. Always ask: am I filtering a row or a group?"
+  },
+  {
+    type:"fill-in", typeLabel:"Fill in the Blank",
+    why:"Correlated vs non-correlated subquery choice",
+    text:"Fill in the blank to list names of doctors who have never written any prescription.",
+    code:`SELECT d.name FROM doctors d\nWHERE ________ (\n  SELECT * FROM prescriptions rx\n  WHERE rx.did = d.did);`,
+    opts:["a) d.did NOT IN",
+          "b) NOT EXISTS",
+          "c) d.did IN",
+          "d) EXISTS",
+          "e) none of the above"],
+    ans:1,
+    expl:"<span class='etag'>NOT EXISTS — correlated</span> The subquery references d.did from the outer query — it's correlated. NOT EXISTS is the correct operator. NOT IN would require a value comparison (d.did NOT IN (list)), which is also possible but the subquery as written uses SELECT * not SELECT d.did, so NOT EXISTS fits the structure shown."
+  },
+  {
+    type:"fill-in", typeLabel:"Fill in the Blank",
+    why:"HAVING COUNT with correct threshold",
+    text:"Fill in X and Y to list each drug that has been prescribed to more than 100 distinct patients.",
+    code:`SELECT rx.drug, COUNT(DISTINCT rx.pid)\nFROM prescriptions rx\nGROUP BY rx.drug\n___X___ COUNT(DISTINCT rx.pid) ___Y___;`,
+    opts:["a) X: HAVING   Y: > 100",
+          "b) X: WHERE   Y: > 100",
+          "c) X: HAVING   Y: = 100",
+          "d) X: AND   Y: > 100",
+          "e) none of the above"],
+    ans:0,
+    expl:"<span class='etag'>HAVING COUNT DISTINCT</span> Filtering on COUNT(DISTINCT rx.pid) must use HAVING after GROUP BY. The threshold is > 100. X = HAVING and Y = > 100."
+  }
+];
+
+let cur = 0, score = 0;
+let answered = new Array(Qs.length).fill(false);
+let selected = new Array(Qs.length).fill(null);
+
+function renderQ(idx) {
+  const q = Qs[idx];
+  const pct = Math.round((idx / Qs.length) * 100);
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-label').textContent = 'Question ' + (idx+1) + ' of ' + Qs.length;
+  const done = answered.filter(Boolean).length;
+  document.getElementById('score-label').textContent = done + ' answered';
+  document.getElementById('score-num').textContent = score;
+  document.getElementById('score-den').textContent = done;
+
+  const opts = q.opts.map((o, i) => {
+    let cls = 'opt-btn', dis = '';
+    if (answered[idx]) {
+      dis = 'disabled';
+      if (i === q.ans) cls += ' correct';
+      else if (i === selected[idx] && selected[idx] !== q.ans) cls += ' wrong';
+    }
+    return '<button class="' + cls + '" ' + dis + ' onclick="pick(' + idx + ',' + i + ')">' +
+           '<span class="opt-letter">' + L[i] + ')</span>' + o + '</button>';
+  }).join('');
+
+  const exStyle = answered[idx] ? 'display:block' : 'display:none';
+  document.getElementById('q-area').innerHTML =
+    '<div class="q-card">' +
+      '<div class="q-label">' +
+        '<span class="type-tag">' + q.typeLabel + '</span>' +
+        '<span class="q-num">Q' + (idx+1) + '</span>' +
+        '<span class="why-hard">' + q.why + '</span>' +
+      '</div>' +
+      '<div class="q-text">' + q.text + '</div>' +
+      (q.code ? '<div class="code-block">' + q.code + '</div>' : '') +
+      '<div class="options">' + opts + '</div>' +
+      '<div class="explanation" id="expl" style="' + exStyle + '">' + q.expl + '</div>' +
+    '</div>';
+
+  document.getElementById('btn-prev').disabled = idx === 0;
+  const nxt = document.getElementById('btn-next');
+  nxt.disabled = !answered[idx];
+  if (idx === Qs.length - 1) {
+    nxt.textContent = 'See Results →';
+    nxt.onclick = showResults;
+  } else {
+    nxt.textContent = 'Next →';
+    nxt.onclick = function(){ navigate(1); };
+  }
+}
+
+function pick(idx, choice) {
+  if (answered[idx]) return;
+  answered[idx] = true;
+  selected[idx] = choice;
+  if (choice === Qs[idx].ans) score++;
+  renderQ(idx);
+  const expl = document.getElementById('expl');
+  if (expl) expl.style.display = 'block';
+}
+
+function navigate(dir) {
+  cur = Math.max(0, Math.min(Qs.length - 1, cur + dir));
+  renderQ(cur);
+}
+
+function showResults() {
+  document.getElementById('quiz-wrap').style.display = 'none';
+  const res = document.getElementById('results-wrap');
+  res.style.display = 'block';
+  const pct = Math.round((score / Qs.length) * 100);
+  document.getElementById('res-score').textContent = score + ' / ' + Qs.length;
+  document.getElementById('res-pct').textContent = pct + '%';
+  document.getElementById('res-msg').textContent =
+    pct >= 85 ? "You've turned your weak areas into strong ones. You're ready." :
+    pct >= 70 ? "Solid improvement. Re-read the explanations for anything you missed." :
+    "Keep going — redo this quiz until the patterns feel automatic.";
+
+  const tm = {};
+  Qs.forEach((q, i) => {
+    if (!tm[q.type]) tm[q.type] = { c:0, t:0 };
+    tm[q.type].t++;
+    if (selected[i] === q.ans) tm[q.type].c++;
+  });
+  let rowsHTML = '';
+  Object.keys(tm).forEach(type => {
+    const d = tm[type];
+    const p = Math.round((d.c / d.t) * 100);
+    const barColor = p >= 80 ? '#34d399' : p >= 60 ? '#fb923c' : '#f87171';
+    const badgeCls = p >= 80 ? 'strong' : p >= 60 ? 'review' : 'focus';
+    const badgeTxt = p >= 80 ? 'Strong' : p >= 60 ? 'Review' : 'Focus Here';
+    rowsHTML +=
+      '<div class="topic-row">' +
+        '<span class="topic-name">' + TOPIC_LABELS[type] + '</span>' +
+        '<div class="topic-bar-wrap"><div class="topic-bar" style="width:' + p + '%;background:' + barColor + '"></div></div>' +
+        '<span class="topic-score-label">' + d.c + '/' + d.t + '</span>' +
+        '<span class="badge ' + badgeCls + '">' + badgeTxt + '</span>' +
+      '</div>';
+  });
+  document.getElementById('topic-rows').innerHTML = rowsHTML;
+
+  const missed = Qs.filter((q, i) => selected[i] !== q.ans);
+  const missedSec = document.getElementById('missed-section');
+  if (missed.length === 0) {
+    missedSec.innerHTML = '<h3>Questions to Review</h3><p style="color:var(--green);font-size:0.88rem;padding:8px 0;">Perfect score — every weak area is now strong!</p>';
+  } else {
+    let mHTML = '';
+    missed.forEach(q => {
+      const qi = Qs.indexOf(q);
+      const yourAns = selected[qi] !== null ? L[selected[qi]] + ') ' + q.opts[selected[qi]] : '(not answered)';
+      const rightAns = L[q.ans] + ') ' + q.opts[q.ans];
+      const snippet = q.code ? '<div style="font-family:monospace;font-size:0.67rem;color:var(--muted);margin:4px 0;white-space:pre-wrap;">' + q.code.substring(0,160) + (q.code.length>160?'…':'') + '</div>' : '';
+      mHTML +=
+        '<div class="missed-item">' +
+          '<div class="missed-q-ref">Q' + (qi+1) + ' &mdash; ' + q.typeLabel + '</div>' +
+          '<div style="font-size:0.8rem;margin-bottom:3px;">' + q.text + '</div>' +
+          snippet +
+          '<div class="missed-wrong">&#10007; You chose: ' + yourAns + '</div>' +
+          '<div class="missed-right">&#10003; Correct: ' + rightAns + '</div>' +
+          '<div class="missed-expl">' + q.expl.replace(/<[^>]+>/g,'') + '</div>' +
+        '</div>';
+    });
+    document.getElementById('missed-list').innerHTML = mHTML;
+    missedSec.querySelector('h3').textContent = 'Questions to Review (' + missed.length + ')';
+  }
+}
+
+function restartQuiz() {
+  cur = 0; score = 0;
+  answered = new Array(Qs.length).fill(false);
+  selected = new Array(Qs.length).fill(null);
+  document.getElementById('results-wrap').style.display = 'none';
+  document.getElementById('quiz-wrap').style.display = 'block';
+  renderQ(0);
+}
+
+renderQ(0);
+</script>
+</body>
+</html>
